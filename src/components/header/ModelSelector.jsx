@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { EGYPT_MOBILE_REGEX } from '../../contracts/handoffSchema';
 import { useStore } from '../../context/StoreContext';
 import { BackArrowRtlIcon, CloseIcon, SearchIcon } from '../icons/Icons';
 
 const EASE = [0.22, 1, 0.36, 1];
-const EGYPT_MOBILE_REGEX = /^01\d{9}$/;
 
 /**
  * Phone model selector:
@@ -109,7 +109,7 @@ export function ModelSelector({ open, onClose }) {
       errors.phoneName = 'اكتب اسم الموبايل والموديل الأول.';
     }
     if (!EGYPT_MOBILE_REGEX.test(cleanMobile)) {
-      errors.mobileNumber = 'اكتب رقم موبايل مصري من 11 رقم بيبدأ بـ 01.';
+      errors.mobileNumber = 'اكتب رقم موبايل مصري صحيح من 11 رقم بيبدأ بـ 010 أو 011 أو 012 أو 015.';
     }
 
     if (Object.keys(errors).length > 0) {

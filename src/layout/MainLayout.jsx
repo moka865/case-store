@@ -14,6 +14,7 @@ function getRouteGroup(pathname) {
   if (pathname === '/categories' || pathname.startsWith('/categories/')) return 'categories';
   if (pathname === '/customize') return 'customize';
   if (pathname === '/how-it-works') return 'how-it-works';
+  if (pathname === '/checkout') return 'checkout';
   return 'not-found';
 }
 
@@ -28,6 +29,7 @@ function getDocumentTitle(pathname) {
   }
   if (pathname === '/customize') return `صمّم جرابك بنفسك — ${brand}`;
   if (pathname === '/how-it-works') return `إزاي تطلب — ${brand}`;
+  if (pathname === '/checkout') return `تأكيد الطلب — ${brand}`;
   return `الصفحة مش موجودة — ${brand}`;
 }
 

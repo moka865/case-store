@@ -207,6 +207,27 @@ export function StoreProvider({ children }) {
     });
   }, []);
 
+  const clearCart = useCallback(() => {
+    setCartItems([]);
+    storeService.saveCart([]);
+  }, []);
+
+  const placeOrder = useCallback(
+    async (customerData) => {
+      const res = await storeService.createOrder({
+        customer: customerData,
+        cartItems,
+        phoneSelection,
+      });
+      if (res.ok) {
+        setCartItems([]);
+        storeService.saveCart([]);
+      }
+      return res;
+    },
+    [cartItems, phoneSelection]
+  );
+
   const cartCount = useMemo(
     () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
     [cartItems]
@@ -261,6 +282,8 @@ export function StoreProvider({ children }) {
     addCustomSpecToCart,
     updateCartQuantity,
     removeCartItem,
+    clearCart,
+    placeOrder,
   };
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

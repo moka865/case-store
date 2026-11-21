@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { STORE_CONFIG } from '../../config/store';
@@ -26,7 +25,6 @@ export function CartDrawer() {
   } = useStore();
 
   const prefersReducedMotion = useReducedMotion();
-  const [showCheckoutNote, setShowCheckoutNote] = useState(false);
 
   const resolveModelForItem = (printSpec) => {
     if (printSpec?.phoneModelId) {
@@ -51,10 +49,7 @@ export function CartDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.22, ease: EASE }}
-            onClick={() => {
-              setIsCartOpen(false);
-              setShowCheckoutNote(false);
-            }}
+            onClick={() => setIsCartOpen(false)}
             className="fixed inset-0 bg-[#26282B]/35"
           />
 
@@ -74,10 +69,7 @@ export function CartDrawer() {
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  setIsCartOpen(false);
-                  setShowCheckoutNote(false);
-                }}
+                onClick={() => setIsCartOpen(false)}
                 aria-label="إغلاق السلة"
                 className="flex h-11 w-11 items-center justify-center rounded-[4px] text-[var(--graphite)] hover:text-[var(--charcoal)] cursor-pointer"
               >
@@ -220,22 +212,13 @@ export function CartDrawer() {
                   {STORE_CONFIG.paymentLabelAr}. مصاريف الشحن بتتحدد حسب المحافظة في الخطوة الجاية.
                 </p>
 
-                <a
-                  href="#checkout-placeholder"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowCheckoutNote(true);
-                  }}
+                <Link
+                  to="/checkout"
+                  onClick={() => setIsCartOpen(false)}
                   className="btn-primary w-full"
                 >
                   كمل الطلب
-                </a>
-
-                {showCheckoutNote ? (
-                  <p role="status" className="text-[13px] font-medium text-[var(--klein)]">
-                    صفحة تأكيد الطلب وحساب الشحن حسب المحافظة هتتضاف في الخطوة الجاية من البناء.
-                  </p>
-                ) : null}
+                </Link>
               </div>
             ) : null}
           </motion.aside>

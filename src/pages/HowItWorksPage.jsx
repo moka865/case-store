@@ -13,11 +13,16 @@ import { useStore } from '../context/StoreContext';
 export function HowItWorksPage() {
   const { governorates } = useStore();
 
+  const activeGovernorates = useMemo(
+    () => governorates.filter((g) => g.codAvailable !== false),
+    [governorates]
+  );
+
   const shippingTiers = useMemo(() => {
-    if (!governorates.length) return [];
-    const cairoGiza = governorates.filter((g) => g.id === 'cairo' || g.id === 'giza');
-    const alex = governorates.find((g) => g.id === 'alexandria');
-    const rest = governorates.filter(
+    if (!activeGovernorates.length) return [];
+    const cairoGiza = activeGovernorates.filter((g) => g.id === 'cairo' || g.id === 'giza');
+    const alex = activeGovernorates.find((g) => g.id === 'alexandria');
+    const rest = activeGovernorates.filter(
       (g) => g.id !== 'cairo' && g.id !== 'giza' && g.id !== 'alexandria'
     );
     const restFees = rest.map((g) => g.shippingFee);
@@ -43,7 +48,7 @@ export function HowItWorksPage() {
           }
         : null,
     ].filter(Boolean);
-  }, [governorates]);
+  }, [activeGovernorates]);
 
   return (
     <div className="pt-8 pb-16 md:pt-14 md:pb-28">
@@ -80,7 +85,7 @@ export function HowItWorksPage() {
               </h2>
               <p className="type-body mt-3 max-w-[50ch] text-[var(--graphite)]">
                 ما بتحتاجش كارت بنكي أو دفع مسبق. بتدفع كاش للمندوب وقت ما تستلم جرابك وتتأكد منه،
-                والشحن متاح لكل محافظات مصر ({governorates.length} محافظة).
+                والشحن متاح لكل محافظات مصر ({activeGovernorates.length} محافظة).
               </p>
 
               <dl className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
