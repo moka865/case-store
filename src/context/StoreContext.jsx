@@ -22,6 +22,7 @@ export function StoreProvider({ children }) {
   const materials = useMemo(() => storeService.getMaterials(), []);
   const governorates = useMemo(() => storeService.getGovernorates(), []);
   const heroProducts = useMemo(() => storeService.getHeroProducts(), []);
+  const heroCases = useMemo(() => storeService.getHeroCases(), []);
 
   const selectedModel = useMemo(() => {
     if (phoneSelection.status === 'selected' && phoneSelection.modelId) {
@@ -257,6 +258,7 @@ export function StoreProvider({ children }) {
     materials,
     governorates,
     heroProducts,
+    heroCases,
     phoneSelection,
     selectedModel,
     visualPreviewModel,

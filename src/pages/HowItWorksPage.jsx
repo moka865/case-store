@@ -51,17 +51,17 @@ export function HowItWorksPage() {
   }, [activeGovernorates]);
 
   return (
-    <div className="pt-8 pb-16 md:pt-14 md:pb-28">
+    <div className="page-band-single">
       <div className="page-container">
-        <div className="grid grid-cols-1 items-start gap-14 lg:grid-cols-12 lg:gap-8">
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-x-[var(--grid-col-gap)]">
           {/* Start editorial spine (sticky on desktop): Page H1 + primary/secondary actions */}
-          <div className="lg:sticky lg:top-[112px] lg:col-span-4 text-start">
+          <div className="lg:sticky lg:top-[var(--header-offset)] lg:col-span-4 text-start">
             <PageHeading
               title="إزاي تطلب؟"
               description="من اختيار الموبايل لحد ما المندوب يوصلك، كل خطوة واضحة وبسيطة."
             />
 
-            <div className="mt-8 flex flex-wrap items-center gap-6">
+            <div className="mt-6 flex flex-wrap items-center gap-6">
               <Link to="/customize" className="btn-primary">
                 صمم جرابك
               </Link>
@@ -71,24 +71,24 @@ export function HowItWorksPage() {
             </div>
           </div>
 
-          {/* End open narrative column directly on the plaster wall */}
-          <div className="lg:col-span-7 lg:col-start-6">
+          {/* End open narrative column directly on the plaster wall (full 8 cols, no empty column gap) */}
+          <div className="lg:col-span-8">
             <HowItWorks variant="editorial" />
 
             {/* Open typographic COD & Governorate shipping overview (no card box, driven by storeService) */}
             <section
               aria-labelledby="cod-shipping-heading"
-              className="mt-16 pt-10 text-start md:mt-24 md:pt-12"
+              className="mt-10 pt-6 text-start md:mt-12 md:pt-6"
             >
               <h2 id="cod-shipping-heading" className="type-h2 text-[var(--charcoal)]">
                 {STORE_CONFIG.paymentLabelAr} والشحن لكل المحافظات
               </h2>
-              <p className="type-body mt-3 max-w-[50ch] text-[var(--graphite)]">
+              <p className="type-body mt-2.5 max-w-[60ch] text-[var(--graphite)]">
                 ما بتحتاجش كارت بنكي أو دفع مسبق. بتدفع كاش للمندوب وقت ما تستلم جرابك وتتأكد منه،
                 والشحن متاح لكل محافظات مصر ({activeGovernorates.length} محافظة).
               </p>
 
-              <dl className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <dl className="mt-[var(--heading-to-content)] grid grid-cols-1 gap-[var(--grid-col-gap)] sm:grid-cols-3">
                 {shippingTiers.map((tier) => (
                   <div key={tier.label} className="text-start">
                     <dt className="type-caption text-[14px]">{tier.label}</dt>

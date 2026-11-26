@@ -7,7 +7,7 @@ import { CaseCustomizer } from '../components/customizer/CaseCustomizer';
  */
 export function CustomizePage() {
   return (
-    <div className="pt-8 md:pt-14">
+    <div className="page-band-top">
       <div className="page-container">
         <PageHeading
           title="صمّم جرابك بنفسك"

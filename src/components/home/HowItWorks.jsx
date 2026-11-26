@@ -36,16 +36,16 @@ export function HowItWorks({ variant = 'compact' }) {
 
   if (variant === 'editorial') {
     return (
-      <ol aria-label="خطوات الطلب" className="space-y-14 md:space-y-20">
+      <ol aria-label="خطوات الطلب" className="space-y-8 md:space-y-10">
         {STEPS.map((item) => (
           <li key={item.step} className="text-start">
-            <h2 className="flex items-baseline gap-3 text-[26px] leading-[1.3] font-bold text-[var(--charcoal)] sm:text-[34px]">
+            <h2 className="flex items-baseline gap-3 text-[24px] leading-[1.3] font-bold text-[var(--charcoal)] sm:text-[30px]">
               <span className="text-[16px] font-semibold tabular-nums text-[var(--graphite)] sm:text-[18px]">
                 {item.step}
               </span>
               <span>{item.title}</span>
             </h2>
-            <p className="type-body mt-4 max-w-[50ch] text-[var(--graphite)]">
+            <p className="type-body mt-3 max-w-[60ch] text-[var(--graphite)]">
               {item.description}
             </p>
 
@@ -78,19 +78,19 @@ export function HowItWorks({ variant = 'compact' }) {
   }
 
   return (
-    <section aria-labelledby="how-heading" className="py-16 md:py-32">
+    <section aria-labelledby="how-heading" className="section-band">
       <div className="page-container">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-x-[var(--grid-col-gap)]">
           <div className="lg:col-span-4 text-start">
             <h2 id="how-heading" className="type-h2 text-[var(--charcoal)]">
               إزاي بتطلب؟
             </h2>
-            <p className="type-body mt-3 max-w-[30ch] text-[var(--graphite)]">
+            <p className="type-body mt-3 max-w-[40ch] text-[var(--graphite)]">
               ثلاث خطوات بسيطة والدفع كاش عند الاستلام لما المندوب يوصلك.
             </p>
           </div>
 
-          <ol className="grid grid-cols-1 gap-10 sm:grid-cols-3 lg:col-span-8 lg:gap-8">
+          <ol className="grid grid-cols-1 gap-6 sm:grid-cols-3 lg:col-span-8 lg:gap-x-[var(--grid-col-gap)]">
             {STEPS.map((item) => (
               <li key={item.step} className="text-start">
                 <h3 className="type-h3 flex items-baseline gap-2.5 text-[var(--charcoal)]">

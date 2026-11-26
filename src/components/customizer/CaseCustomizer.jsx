@@ -228,32 +228,37 @@ export function CaseCustomizer({
     <section
       aria-labelledby={hideHeader ? undefined : 'customizer-heading'}
       aria-label={hideHeader ? 'أدوات تصميم الجراب' : undefined}
-      className={hideHeader ? 'pt-8 pb-16 md:pt-12 md:pb-28' : 'py-16 md:py-32'}
+      className={
+        hideHeader
+          ? 'pt-[var(--heading-to-content)] pb-[var(--section-pad-y)]'
+          : 'section-band'
+      }
     >
       <div className="page-container">
         {!hideHeader ? (
-          <div className="mb-10 max-w-[54ch] text-start md:mb-14">
+          <div className="mb-[var(--heading-to-content)] text-start">
             <h2 id="customizer-heading" className="type-h1 text-[var(--charcoal)]">
               صمّم جرابك بنفسك
             </h2>
-            <p className="type-body mt-3 text-[var(--graphite)]">
+            <p className="type-body mt-2.5 max-w-[60ch] text-[var(--graphite)]">
               ارفع صورتك واكتب اسمك لو حابب. فريق التصميم عندنا بيظبط القص ومكان الكاميرا قبل الطباعة.
             </p>
           </div>
         ) : null}
 
-        {/* Desktop: 2 panes (Start/right = preview, End/left = controls). Mobile: sticky preview on top, controls below. */}
-        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-12">
-          {/* START PANE: Live case preview (sticky top below 2-row mobile header & desktop header) */}
-          <div className="sticky top-[104px] z-20 -mx-[var(--page-margin)] bg-[var(--plaster)] px-[var(--page-margin)] py-3 lg:top-[104px] lg:col-span-5 lg:mx-0 lg:px-0 lg:py-0">
+        {/* Desktop: 2 panes (Start/right = 4-col live preview, End/left = 8-col controls). Mobile: sticky preview on top, controls below. */}
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-x-[var(--grid-col-gap)]">
+          {/* START PANE: Live case preview */}
+          <div className="sticky top-[var(--header-offset)] z-20 -mx-[var(--page-margin)] bg-[var(--plaster)] px-[var(--page-margin)] py-3 lg:col-span-4 lg:mx-0 lg:px-0 lg:py-0">
             <div className="flex flex-col items-center">
               <div
-                className={`w-[136px] transition-transform duration-150 sm:w-[172px] lg:w-[276px] ${
+                className={`w-[136px] transition-transform duration-150 sm:w-[172px] lg:w-full lg:max-w-[330px] xl:max-w-[364px] ${
                   imageUrl ? 'cursor-grab active:cursor-grabbing' : ''
                 }`}
               >
                 <PhoneCaseMockup
                   model={previewModel}
+                  interactive={false}
                   customImage={
                     imageUrl
                       ? {
@@ -274,7 +279,7 @@ export function CaseCustomizer({
                 />
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 lg:mt-5">
+              <div className="mt-[var(--image-to-caption)] flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
                 <span className="type-caption">
                   المعاينة على{' '}
                   <bdi dir="ltr" className="font-semibold text-[var(--charcoal)]">
@@ -301,7 +306,7 @@ export function CaseCustomizer({
           </div>
 
           {/* END PANE: Gallery-white controls surface */}
-          <div className="rounded-[4px] bg-[var(--gallery-white)] p-5 text-start sm:p-8 lg:col-span-7">
+          <div className="rounded-[4px] bg-[var(--gallery-white)] p-5 text-start sm:p-7 lg:col-span-8">
             <div className="space-y-8">
               {/* 1. Image upload drop zone */}
               <div>

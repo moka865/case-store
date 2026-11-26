@@ -29,7 +29,7 @@ function OrderItemsList({ items, allPhoneModels, fallbackModel }) {
         const printedName = spec?.printedName?.enabled ? spec.printedName : null;
 
         return (
-          <li key={item.cartItemId || item.id} className="flex items-start gap-3.5 text-start">
+          <li key={item.cartItemId || item.id} className="case-lift-group flex items-start gap-3.5 text-start">
             <div className="w-[46px] shrink-0">
               <PhoneCaseMockup
                 model={itemModel}
@@ -223,15 +223,15 @@ export function CheckoutPage() {
   // ---------- Confirmation View ----------
   if (confirmedOrder) {
     return (
-      <section className="py-12 md:py-24">
+      <section className="page-band-single">
         <div className="page-container">
-          <div className="max-w-[60ch] text-start">
+          <div className="text-start">
             <PageHeading
               title="تم استلام طلبك"
               description="خدمة العملاء هتكلمك لتأكيد الطلب قبل الطباعة."
             />
 
-            <p className="mt-6 text-[24px] font-bold text-[var(--charcoal)] sm:text-[28px]">
+            <p className="mt-5 text-[24px] font-bold text-[var(--charcoal)] sm:text-[28px]">
               رقم الطلب:{' '}
               <bdi dir="ltr" className="latin-title">
                 {confirmedOrder.id}
@@ -239,13 +239,13 @@ export function CheckoutPage() {
             </p>
 
             {confirmedOrder.pendingModel ? (
-              <p className="mt-4 rounded-[4px] bg-[var(--gallery-white)] px-4 py-3 text-[15px] font-medium text-[var(--charcoal)]">
+              <p className="mt-4 max-w-[60ch] rounded-[4px] bg-[var(--gallery-white)] px-4 py-3 text-[15px] font-medium text-[var(--charcoal)]">
                 موديل موبايلك لسه بيتأكد — خدمة العملاء هتكلمك لتأكيد المقاس قبل الطباعة.
               </p>
             ) : null}
 
             {/* Snapshot summary directly on --plaster (zero cards, zero middle dots) */}
-            <dl className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            <dl className="mt-[var(--heading-to-content)] grid grid-cols-1 gap-[var(--grid-col-gap)] sm:grid-cols-3">
               <div>
                 <dt className="type-caption text-[13px]">الإجمالي ({STORE_CONFIG.paymentLabelAr})</dt>
                 <dd className="mt-1 text-[22px] font-bold tabular-nums text-[var(--charcoal)]">
@@ -311,13 +311,13 @@ export function CheckoutPage() {
   // ---------- Empty Cart State ----------
   if (cartItems.length === 0) {
     return (
-      <section className="py-16 md:py-28">
+      <section className="page-band-single">
         <div className="page-container">
           <PageHeading
             title="سلتك فاضية دلوقتي"
             description="اختار تصميم من الجرابات أو ارفع صورتك وصمّم جرابك الأول عشان تكمل الطلب."
           />
-          <div className="mt-8 flex flex-wrap items-center gap-6">
+          <div className="mt-6 flex flex-wrap items-center gap-6">
             <Link to="/categories" className="btn-primary">
               شوف الجرابات
             </Link>
@@ -332,7 +332,7 @@ export function CheckoutPage() {
 
   // ---------- Main Checkout View ----------
   return (
-    <div className="pt-6 pb-16 md:pt-12 md:pb-28">
+    <div className="page-band-single">
       <div className="page-container">
         <PageHeading
           title="تأكيد الطلب"
@@ -396,13 +396,13 @@ export function CheckoutPage() {
         </div>
 
         {/* Asymmetric 7 + 5 Desktop Grid */}
-        <div className="mt-8 grid grid-cols-1 items-start gap-10 lg:mt-12 lg:grid-cols-12 lg:gap-12">
+        <div className="mt-[var(--heading-to-content)] grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-x-[var(--grid-col-gap)]">
           {/* START COLUMN (7 cols): Delivery form directly on --plaster */}
           <form
             id="checkout-form"
             onSubmit={handleSubmit}
             noValidate
-            className="space-y-6 text-start lg:col-span-7"
+            className="flex flex-col gap-5 text-start lg:col-span-7"
           >
             {hasPendingModel ? (
               <div
@@ -577,7 +577,7 @@ export function CheckoutPage() {
           </form>
 
           {/* END COLUMN (5 cols, desktop sticky): Gallery-white COD receipt */}
-          <aside className="hidden rounded-[4px] bg-[var(--gallery-white)] p-7 text-start lg:sticky lg:top-[104px] lg:col-span-5 lg:block">
+          <aside className="hidden rounded-[4px] bg-[var(--gallery-white)] p-6 text-start lg:sticky lg:top-[var(--header-offset)] lg:col-span-5 lg:block">
             <div className="flex items-baseline justify-between gap-3">
               <h2 className="type-h3 text-[var(--charcoal)]">ملخص طلبك</h2>
               <span className="type-caption tabular-nums">{cartCount} قطع</span>

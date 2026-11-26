@@ -11,7 +11,7 @@ export function HomePage() {
   return (
     <>
       <HeroSection />
-      <SalonHangGrid limit={6} showViewAllLink ignoreSearch />
+      <SalonHangGrid previewRows={2} showViewAllLink ignoreSearch />
       <CustomizerTeaser />
     </>
   );

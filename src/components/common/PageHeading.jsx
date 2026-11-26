@@ -5,7 +5,7 @@
  */
 export function PageHeading({ title, description = null, className = '' }) {
   return (
-    <div className={`max-w-[56ch] text-start ${className}`}>
+    <div className={`text-start ${className}`}>
       <h1
         tabIndex={-1}
         className="type-h1 text-[var(--charcoal)] outline-none"
@@ -13,7 +13,7 @@ export function PageHeading({ title, description = null, className = '' }) {
         {title}
       </h1>
       {description ? (
-        <p className="type-body mt-3 text-[var(--graphite)]">{description}</p>
+        <p className="type-body mt-2.5 max-w-[60ch] text-[var(--graphite)]">{description}</p>
       ) : null}
     </div>
   );

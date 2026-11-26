@@ -71,7 +71,7 @@ export function MainLayout() {
   }, [pathname, routeGroup]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--plaster)] text-[var(--charcoal)]">
+    <div className="flex flex-col bg-[var(--plaster)] text-[var(--charcoal)]">
       <Header />
       <motion.main
         key={routeGroup}

@@ -78,10 +78,10 @@ export function CartDrawer() {
             </div>
 
             {/* Items list */}
-            <div className="flex-1 overflow-y-auto px-6 py-2">
+            <div className="flex-1 overflow-y-auto px-6 pt-4 pb-6">
               {cartItems.length === 0 ? (
-                <div className="py-16 text-start">
-                  <p className="type-body text-[var(--charcoal)]">
+                <div className="py-10 text-start">
+                  <p className="type-body max-w-[60ch] text-[var(--charcoal)]">
                     سلتك فاضية دلوقتي. اختار تصميم من الجرابات أو ارفع صورتك وصمّم جرابك.
                   </p>
                   <div className="mt-6 flex flex-wrap gap-5">
@@ -102,7 +102,7 @@ export function CartDrawer() {
                   </div>
                 </div>
               ) : (
-                <ul className="space-y-6">
+                <ul className="space-y-5">
                   {cartItems.map((item) => {
                     const spec = item.printSpec;
                     const itemModel = resolveModelForItem(spec);
@@ -110,7 +110,7 @@ export function CartDrawer() {
                     const printedName = spec?.printedName?.enabled ? spec.printedName : null;
 
                     return (
-                      <li key={item.cartItemId} className="flex items-start gap-4">
+                      <li key={item.cartItemId} className="case-lift-group flex items-start gap-4">
                         {/* Live miniature preview of the actual print */}
                         <div className="w-[54px] shrink-0">
                           <PhoneCaseMockup

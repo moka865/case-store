@@ -8,6 +8,7 @@ import {
 } from '../contracts/handoffSchema';
 import { CATEGORIES } from '../data/categories';
 import { GOVERNORATES } from '../data/governorates';
+import { HERO_CASES } from '../data/heroCases';
 import { MATERIALS } from '../data/materials';
 import { PHONE_BRANDS, PHONE_MODELS } from '../data/phoneModels';
 import { PRODUCTS } from '../data/products';
@@ -95,6 +96,10 @@ export const storeService = {
 
   getHeroProducts() {
     return PRODUCTS.filter((p) => p.featuredInHero);
+  },
+
+  getHeroCases() {
+    return [...HERO_CASES];
   },
 
   getProducts({ modelId = null, modelStatus = 'none', categoryId = null, searchQuery = '' } = {}) {

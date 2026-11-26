@@ -43,7 +43,7 @@ export function CategoriesPage() {
   }, [scrollTrigger, slug, prefersReducedMotion]);
 
   return (
-    <div className="pt-8 md:pt-14">
+    <div className="page-band-top">
       <div className="page-container">
         <PageHeading
           title="الأقسام"
@@ -58,10 +58,10 @@ export function CategoriesPage() {
       />
 
       {isUnknownSlug ? (
-        <section className="py-12">
+        <section className="section-band">
           <div className="page-container">
-            <div className="max-w-[46ch] text-start">
-              <p className="type-h3 text-[var(--charcoal)]">
+            <div className="text-start">
+              <p className="type-h3 max-w-[60ch] text-[var(--charcoal)]">
                 القسم ده مش موجود. اختار قسم من فوق أو شوف كل الجرابات المتاحة.
               </p>
               <div className="mt-6">
