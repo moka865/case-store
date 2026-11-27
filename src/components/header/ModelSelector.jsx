@@ -1,16 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { EGYPT_MOBILE_REGEX } from '../../contracts/handoffSchema';
 import { useStore } from '../../context/StoreContext';
-import { BackArrowRtlIcon, CheckIcon, CloseIcon, SearchIcon } from '../icons/Icons';
+import { CheckIcon, CloseIcon, SearchIcon } from '../icons/Icons';
+import { MissingPhoneRequestForm } from './PhoneModelFields';
 
 const EASE = [0.22, 1, 0.36, 1];
 
 /**
- * Phone model selector panel:
- * - Desktop: anchored dropdown under the top-left selector
- * - Mobile: bottom sheet
- * Uses unified brand tokens (`--surface`, `--card-bg`, `--ink`, `--brand`, `--brand-yellow-tint`).
+ * Site-wide Header Phone-Model Selector:
+ * Sets the default phone filter across listings; individual items can override their model
+ * on the product page, customizer, quick-add modal, or cart without mutating this default.
  */
 export function ModelSelector({ open, onClose }) {
   const {
@@ -25,10 +24,6 @@ export function ModelSelector({ open, onClose }) {
   const [activeBrand, setActiveBrand] = useState(selectedModel?.brand || phoneBrands[0]);
   const [query, setQuery] = useState('');
   const [view, setView] = useState('list');
-
-  const [phoneNameInput, setPhoneNameInput] = useState('');
-  const [mobileInput, setMobileInput] = useState('');
-  const [formErrors, setFormErrors] = useState({});
   const [submittedPhoneName, setSubmittedPhoneName] = useState('');
 
   const [isMobileViewport, setIsMobileViewport] = useState(
@@ -37,7 +32,6 @@ export function ModelSelector({ open, onClose }) {
 
   const panelRef = useRef(null);
   const searchInputRef = useRef(null);
-  const phoneNameInputRef = useRef(null);
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)');
@@ -53,7 +47,6 @@ export function ModelSelector({ open, onClose }) {
     if (open && !wasOpenRef.current) {
       setView('list');
       setQuery('');
-      setFormErrors({});
       if (selectedModel?.brand) {
         setActiveBrand(selectedModel.brand);
       }
@@ -63,14 +56,6 @@ export function ModelSelector({ open, onClose }) {
     }
     wasOpenRef.current = open;
   }, [open, selectedModel]);
-
-  useEffect(() => {
-    if (open && view === 'missing-form') {
-      requestAnimationFrame(() => {
-        phoneNameInputRef.current?.focus();
-      });
-    }
-  }, [open, view]);
 
   useEffect(() => {
     if (!open || isMobileViewport) return;
@@ -95,32 +80,6 @@ export function ModelSelector({ open, onClose }) {
     return allPhoneModels.filter((m) => m.brand === activeBrand);
   }, [allPhoneModels, activeBrand, query]);
 
-  const handleMissingSubmit = (e) => {
-    e.preventDefault();
-    const errors = {};
-    const cleanPhone = phoneNameInput.trim();
-    const cleanMobile = mobileInput.replace(/\s+/g, '');
-
-    if (cleanPhone.length < 2) {
-      errors.phoneName = 'اكتب اسم الموبايل والموديل الأول.';
-    }
-    if (!EGYPT_MOBILE_REGEX.test(cleanMobile)) {
-      errors.mobileNumber = 'اكتب رقم موبايل مصري صحيح من 11 رقم بيبدأ بـ 010 أو 011 أو 012 أو 015.';
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
-
-    setFormErrors({});
-    submitMissingPhone({ phoneName: cleanPhone, mobileNumber: cleanMobile });
-    setSubmittedPhoneName(cleanPhone);
-    setPhoneNameInput('');
-    setMobileInput('');
-    setView('missing-confirmed');
-  };
-
   const panelBody = (
     <div className="flex flex-col text-start text-[var(--ink)]" style={{ maxHeight: isMobileViewport ? '84dvh' : '540px' }}>
       {isMobileViewport ? (
@@ -130,30 +89,16 @@ export function ModelSelector({ open, onClose }) {
       ) : null}
 
       <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 pt-3.5 pb-3">
-        {view === 'missing-form' ? (
-          <button
-            type="button"
-            onClick={() => {
-              setView('list');
-              setFormErrors({});
-            }}
-            className="inline-flex min-h-[40px] items-center gap-2 text-[14.5px] font-bold text-[var(--ink)] hover:text-[var(--brand)] cursor-pointer"
-          >
-            <BackArrowRtlIcon className="h-4 w-4" />
-            <span>رجوع للموديلات</span>
-          </button>
-        ) : (
-          <div>
-            <h2 className="type-h3 text-[18px] text-[var(--ink)]">
-              {view === 'missing-confirmed' ? 'استلمنا طلب موديلك' : 'اختار موديل موبايلك'}
-            </h2>
-            {view === 'list' ? (
-              <p className="text-[12.5px] text-[var(--ink-muted)]">
-                بنفلتر الجرابات ونظبط فتحة الكاميرا على مقاسك
-              </p>
-            ) : null}
-          </div>
-        )}
+        <div>
+          <h2 className="type-h3 text-[18px] text-[var(--ink)]">
+            {view === 'missing-confirmed' ? 'استلمنا طلب موديلك' : 'اختار موديل موبايلك'}
+          </h2>
+          {view === 'list' ? (
+            <p className="text-[12.5px] text-[var(--ink-muted)]">
+              فلتر التصميمات لموبايلك، وتقدر تغيّر الموديل لكل جراب لوحده وقت الطلب
+            </p>
+          ) : null}
+        </div>
 
         <button
           type="button"
@@ -274,72 +219,21 @@ export function ModelSelector({ open, onClose }) {
       ) : null}
 
       {view === 'missing-form' ? (
-        <form onSubmit={handleMissingSubmit} noValidate className="space-y-4 px-5 pt-4 pb-5">
-          <p className="text-[14.5px] leading-[1.65] text-[var(--ink-muted)]">
-            اكتب نوع موبايلك ورقمك وهنتأكدلك إن مقاسه متاح عندنا قبل ما تطلب.
-          </p>
-
-          <div>
-            <label
-              htmlFor="missing-phone-name"
-              className="mb-1.5 block text-[14px] font-semibold text-[var(--ink)]"
-            >
-              اسم الموبايل والموديل
-            </label>
-            <input
-              ref={phoneNameInputRef}
-              id="missing-phone-name"
-              type="text"
-              value={phoneNameInput}
-              onChange={(e) => setPhoneNameInput(e.target.value)}
-              placeholder="مثلاً: Nothing Phone 2a"
-              aria-invalid={Boolean(formErrors.phoneName)}
-              aria-describedby={formErrors.phoneName ? 'missing-phone-name-err' : undefined}
-              className="min-h-[46px] w-full rounded-[var(--radius-ui)] border border-[var(--border-strong)] bg-[var(--surface)] px-3.5 text-[15px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
-            />
-            {formErrors.phoneName ? (
-              <p id="missing-phone-name-err" className="mt-1.5 text-[13px] font-semibold text-[var(--brand)]">
-                {formErrors.phoneName}
-              </p>
-            ) : null}
-          </div>
-
-          <div>
-            <label
-              htmlFor="missing-phone-mobile"
-              className="mb-1.5 block text-[14px] font-semibold text-[var(--ink)]"
-            >
-              رقم الموبايل
-            </label>
-            <input
-              id="missing-phone-mobile"
-              type="tel"
-              dir="ltr"
-              inputMode="numeric"
-              maxLength={11}
-              value={mobileInput}
-              onChange={(e) => setMobileInput(e.target.value.replace(/[^\d]/g, '').slice(0, 11))}
-              placeholder="01012345678"
-              aria-invalid={Boolean(formErrors.mobileNumber)}
-              aria-describedby={formErrors.mobileNumber ? 'missing-phone-mobile-err' : undefined}
-              className="min-h-[46px] w-full rounded-[var(--radius-ui)] border border-[var(--border-strong)] bg-[var(--surface)] px-3.5 text-start text-[15px] tabular-nums text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
-            />
-            {formErrors.mobileNumber ? (
-              <p id="missing-phone-mobile-err" className="mt-1.5 text-[13px] font-semibold text-[var(--brand)]">
-                {formErrors.mobileNumber}
-              </p>
-            ) : null}
-          </div>
-
-          <button type="submit" className="btn-primary w-full">
-            ابعت الطلب
-          </button>
-        </form>
+        <div className="px-5 pt-4 pb-5">
+          <MissingPhoneRequestForm
+            onCancel={() => setView('list')}
+            onSubmitRequest={({ phoneName, mobileNumber }) => {
+              submitMissingPhone({ phoneName, mobileNumber });
+              setSubmittedPhoneName(phoneName);
+              setView('missing-confirmed');
+            }}
+          />
+        </div>
       ) : null}
 
       {view === 'missing-confirmed' ? (
         <div className="space-y-4 px-5 pt-4 pb-5">
-          <div className="rounded-[var(--radius-ui)] bg-[var(--jade-tint)] border border-[var(--jade)]/25 p-3.5">
+          <div className="rounded-[var(--radius-ui)] border border-[var(--jade)]/25 bg-[var(--jade-tint)] p-3.5">
             <p className="text-[15.5px] leading-[1.65] font-bold text-[var(--jade)]">
               خدمة العملاء هتتواصل معاك لتأكيد الموديل
             </p>

@@ -2,17 +2,17 @@ import { useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { STORE_CONFIG } from '../../config/store';
-import { CheckIcon, CustomPenIcon } from '../icons/Icons';
+import { CheckIcon } from '../icons/Icons';
 import { PhoneCaseMockup } from '../mockup/PhoneCaseMockup';
 
 const EASE = [0.22, 1, 0.36, 1];
 
 /**
- * Unified غلاف Product Card:
- * - Every single product card shares the exact same `.product-stage` (`--card-bg: #ECEAE4`)
- *   background regardless of artwork so the brand identity stays 100% consistent
- * - Real crawlable `<Link to="/products/:slug">` wrapping both the case stage and title
- * - Consistent silhouette shadow + gentle GPU hover lift
+ * Clean, unified غلاف Product Card:
+ * - Fixed `.product-stage` (`--card-bg: #ECEAE4`) across all cards
+ * - Real `<Link to="/products/:slug">` wrapping stage and title
+ * - When no phone is chosen site-wide, `onAdd` opens the compact Brand/Model picker instead of adding blindly
+ * - Subtle, unobtrusive hint for optional name printing
  */
 export function ProductCard({
   product,
@@ -26,7 +26,8 @@ export function ProductCard({
   const productUrl = `/products/${product.id}`;
 
   const handleAdd = () => {
-    onAdd(product);
+    const res = onAdd(product);
+    if (res?.openedPhonePicker) return;
     setJustAdded(true);
     window.setTimeout(() => {
       setJustAdded(false);
@@ -45,7 +46,6 @@ export function ProductCard({
       }}
       className="case-lift-group group flex h-full flex-col"
     >
-      {/* Fixed Brand Stage Surface (`--card-bg`) — identical across every product */}
       <Link
         to={productUrl}
         aria-label={`${product.name} — ${product.price} ${STORE_CONFIG.currencyLabel}`}
@@ -84,70 +84,66 @@ export function ProductCard({
         <div className="relative z-0 h-1 w-full" aria-hidden="true" />
       </Link>
 
-      {/* Aligned product caption + consistent CTA row */}
-      <div className="mt-3 flex flex-1 flex-col justify-between gap-2.5 text-start">
-        <div className="flex flex-col items-start gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
-          <h3 className="w-full min-w-0 truncate text-[14.5px] sm:w-auto sm:text-[16px] font-bold leading-[1.35] text-[var(--ink)]">
-            <Link
-              to={productUrl}
-              className="hover:text-[var(--brand)] transition-colors"
-            >
-              <bdi dir="ltr" className="latin-title">{product.name}</bdi>
-            </Link>
-          </h3>
-          <span className="shrink-0 text-[13.5px] sm:text-[15px] font-bold tabular-nums text-[var(--ink)]">
-            {product.price} {STORE_CONFIG.currencyLabel}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleAdd}
-            aria-live="polite"
-            className={`inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-ui)] border px-3 text-[13.5px] sm:text-[14px] font-bold transition-colors duration-150 cursor-pointer ${
-              justAdded
-                ? 'border-[var(--jade)] bg-[var(--jade)] text-white'
-                : 'border-[var(--border-strong)] bg-[var(--surface)] text-[var(--ink)] hover:border-[var(--brand)] hover:bg-[var(--brand)] hover:text-white'
-            }`}
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              {justAdded ? (
-                <motion.span
-                  key="added"
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 3 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={prefersReducedMotion ? undefined : { opacity: 0, y: -3 }}
-                  transition={{ duration: 0.22, ease: EASE }}
-                  className="inline-flex items-center gap-1"
-                >
-                  <CheckIcon className="h-3.5 w-3.5" />
-                  <span>اتضاف</span>
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="add"
-                  initial={prefersReducedMotion ? false : { opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-                  transition={{ duration: 0.16, ease: EASE }}
-                >
-                  ضيف للسلة
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
+      <div className="mt-3 flex flex-1 flex-col justify-between gap-2 text-start">
+        <div>
+          <div className="flex flex-col items-start gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
+            <h3 className="w-full min-w-0 truncate text-[14.5px] sm:w-auto sm:text-[16px] font-bold leading-[1.35] text-[var(--ink)]">
+              <Link
+                to={productUrl}
+                className="hover:text-[var(--brand)] transition-colors"
+              >
+                <bdi dir="ltr" className="latin-title">{product.name}</bdi>
+              </Link>
+            </h3>
+            <span className="shrink-0 text-[13.5px] sm:text-[15px] font-bold tabular-nums text-[var(--ink)]">
+              {product.price} {STORE_CONFIG.currencyLabel}
+            </span>
+          </div>
 
           <Link
             to={`${productUrl}?name=1`}
-            title="اطبع اسمك على التصميم ده"
-            aria-label={`اطبع اسمك على جراب ${product.name}`}
-            className="hidden sm:inline-flex min-h-[40px] shrink-0 items-center justify-center gap-1 rounded-[var(--radius-ui)] border border-[var(--border-subtle)] bg-[var(--card-bg)] px-2.5 text-[12.5px] font-semibold text-[var(--ink)] hover:border-[var(--border-strong)] transition-colors"
+            className="mt-0.5 inline-block text-[12px] text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors"
           >
-            <CustomPenIcon className="h-3.5 w-3.5" />
-            <span>باسمك</span>
+            متاح طباعة اسمك (+{STORE_CONFIG.namePrintFee} {STORE_CONFIG.currencyLabel})
           </Link>
         </div>
+
+        <button
+          type="button"
+          onClick={handleAdd}
+          aria-live="polite"
+          className={`inline-flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-[var(--radius-ui)] border px-3 text-[13.5px] sm:text-[14px] font-bold transition-colors duration-150 cursor-pointer ${
+            justAdded
+              ? 'border-[var(--jade)] bg-[var(--jade)] text-white'
+              : 'border-[var(--border-strong)] bg-[var(--surface)] text-[var(--ink)] hover:border-[var(--brand)] hover:bg-[var(--brand)] hover:text-white'
+          }`}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            {justAdded ? (
+              <motion.span
+                key="added"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -3 }}
+                transition={{ duration: 0.22, ease: EASE }}
+                className="inline-flex items-center gap-1"
+              >
+                <CheckIcon className="h-3.5 w-3.5" />
+                <span>اتضاف</span>
+              </motion.span>
+            ) : (
+              <motion.span
+                key="add"
+                initial={prefersReducedMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={prefersReducedMotion ? undefined : { opacity: 0 }}
+                transition={{ duration: 0.16, ease: EASE }}
+              >
+                ضيف للسلة
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
       </div>
     </motion.article>
   );

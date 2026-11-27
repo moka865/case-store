@@ -1,6 +1,6 @@
 /**
  * Single store configuration constant.
- * Swap name, pricing, production window, contact details, or defaults here without touching UI components.
+ * Swap name, pricing, namePrintFee, production window, contact details, or defaults here without touching UI components.
  */
 export const STORE_CONFIG = {
   name: 'غلاف',
@@ -11,6 +11,7 @@ export const STORE_CONFIG = {
   paymentMethod: 'cash_on_delivery',
   paymentLabelAr: 'الدفع عند الاستلام',
   customCasePrice: 320,
+  namePrintFee: 50,
   productionDays: 2,
   defaultMaterialId: 'matte-hard-shell',
   defaultPreviewModelId: 'iphone-16-pro',

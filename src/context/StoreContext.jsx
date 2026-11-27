@@ -1,6 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { STORE_CONFIG } from '../config/store';
 import { storeService } from '../services/storeService';
+import {
+  arePrintSpecsMergeable,
+  computeCartTotals,
+  hasActivePrintedName,
+  normalizePrintedNameSpec,
+} from '../utils/pricing';
 
 const StoreContext = createContext(null);
 
@@ -15,6 +21,9 @@ export function StoreProvider({ children }) {
   const [cartItems, setCartItems] = useState(() => storeService.loadCart());
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartPulseKey, setCartPulseKey] = useState(0);
+
+  // Product passed to the quick-add phone picker modal when no site-wide phone is set
+  const [quickAddProduct, setQuickAddProduct] = useState(null);
 
   const categories = useMemo(() => storeService.getCategories(), []);
   const phoneBrands = useMemo(() => storeService.getPhoneBrands(), []);
@@ -52,7 +61,6 @@ export function StoreProvider({ children }) {
     });
   }, [phoneSelection.modelId, phoneSelection.status]);
 
-  // Show gentle first-visit popover only if user hasn't picked a phone and hasn't dismissed it
   const showFirstVisitPopover =
     phoneSelection.status === 'none' && !popoverDismissed && !isModelSelectorOpen;
 
@@ -61,6 +69,7 @@ export function StoreProvider({ children }) {
     storeService.savePopoverDismissed(true);
   }, []);
 
+  // Site-wide default phone model selector (Header)
   const selectPhoneModel = useCallback((modelId) => {
     const next = {
       status: 'selected',
@@ -75,6 +84,7 @@ export function StoreProvider({ children }) {
     setIsModelSelectorOpen(false);
   }, []);
 
+  // Site-wide missing-phone request (Header)
   const submitMissingPhone = useCallback(({ phoneName, mobileNumber }) => {
     const record = storeService.submitMissingPhoneRequest({ phoneName, mobileNumber });
     const next = {
@@ -90,21 +100,66 @@ export function StoreProvider({ children }) {
     return record;
   }, []);
 
+  // Per-item missing-phone request (Product Page / Customizer / Quick-Add / Cart) — does NOT overwrite site-wide filter
+  const submitItemMissingPhone = useCallback(({ phoneName, mobileNumber }) => {
+    return storeService.submitMissingPhoneRequest({ phoneName, mobileNumber });
+  }, []);
+
+  /**
+   * Resolves a phone selection object (`itemPhone` override or site-wide `phoneSelection`)
+   * into `{ phoneModelId, phoneModelName, phoneModelStatus, pendingRequestId }`.
+   */
+  const resolvePhoneSpecFields = useCallback(
+    (itemPhone = null) => {
+      const source = itemPhone || phoneSelection;
+      if (source?.status === 'pending') {
+        return {
+          phoneModelId: null,
+          phoneModelName: source.pendingPhoneName || 'موديلك بيتأكد',
+          phoneModelStatus: 'pending',
+          pendingRequestId: source.pendingRequestId || null,
+        };
+      }
+      if (source?.status === 'selected' && source.modelId) {
+        const modelObj = storeService.getPhoneModelById(source.modelId);
+        if (modelObj) {
+          return {
+            phoneModelId: modelObj.id,
+            phoneModelName: modelObj.name,
+            phoneModelStatus: 'selected',
+            pendingRequestId: null,
+          };
+        }
+      }
+      return {
+        phoneModelId: null,
+        phoneModelName: visualPreviewModel.name,
+        phoneModelStatus: 'unassigned',
+        pendingRequestId: null,
+      };
+    },
+    [phoneSelection, visualPreviewModel]
+  );
+
+  /**
+   * Adds a catalog product to the cart.
+   * Accepts optional `{ itemPhone, printedName }` per-item overrides; when called from listing
+   * quick-add with no phone chosen anywhere, opens `QuickAddPhoneModal` instead of adding blindly.
+   */
   const addCatalogProductToCart = useCallback(
-    (product) => {
-      const modelStatus = phoneSelection.status === 'pending' ? 'pending' : selectedModel ? 'selected' : 'unassigned';
-      const phoneModelId = selectedModel ? selectedModel.id : null;
-      const phoneModelName =
-        phoneSelection.status === 'pending'
-          ? phoneSelection.pendingPhoneName || 'موديلك بيتأكد'
-          : selectedModel
-            ? selectedModel.name
-            : visualPreviewModel.name;
+    (product, options = {}) => {
+      const effectivePhone = options.itemPhone || phoneSelection;
+      if (!effectivePhone || effectivePhone.status === 'none' || (effectivePhone.status === 'selected' && !effectivePhone.modelId)) {
+        setQuickAddProduct(product);
+        return { openedPhonePicker: true };
+      }
+
+      const phoneFields = resolvePhoneSpecFields(effectivePhone);
+      const normalizedName = normalizePrintedNameSpec(options.printedName);
+      const unitNameFee = hasActivePrintedName(normalizedName) ? STORE_CONFIG.namePrintFee : 0;
 
       const printSpec = {
-        phoneModelId,
-        phoneModelName,
-        phoneModelStatus: modelStatus,
+        ...phoneFields,
         materialId: product.materialId || STORE_CONFIG.defaultMaterialId,
         designSource: {
           type: 'catalog',
@@ -119,32 +174,21 @@ export function StoreProvider({ children }) {
           scale: 1,
           rotation: 0,
         },
-        printedName: {
-          enabled: false,
-          text: '',
-          script: null,
-          fontId: null,
-          fontFamily: null,
-          placement: 'bottom',
-          ink: 'light',
-        },
+        printedName: normalizedName,
         createdAt: new Date().toISOString(),
       };
 
       setCartItems((prev) => {
-        const existingIndex = prev.findIndex(
-          (item) =>
-            item.printSpec?.designSource?.type === 'catalog' &&
-            item.printSpec?.designSource?.productId === product.id &&
-            item.printSpec?.phoneModelId === phoneModelId &&
-            item.printSpec?.phoneModelStatus === modelStatus &&
-            !item.printSpec?.printedName?.enabled
+        const existingIndex = prev.findIndex((item) =>
+          arePrintSpecsMergeable(item.printSpec, printSpec)
         );
 
         let next;
         if (existingIndex >= 0) {
           next = prev.map((item, idx) =>
-            idx === existingIndex ? { ...item, quantity: item.quantity + 1 } : item
+            idx === existingIndex
+              ? { ...item, namePrintFee: unitNameFee, quantity: item.quantity + 1 }
+              : item
           );
         } else {
           next = [
@@ -152,6 +196,7 @@ export function StoreProvider({ children }) {
               cartItemId: `ci-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
               name: product.name,
               price: product.price,
+              namePrintFee: unitNameFee,
               currency: product.currency || STORE_CONFIG.currencyCode,
               quantity: 1,
               printSpec,
@@ -163,28 +208,120 @@ export function StoreProvider({ children }) {
         return next;
       });
       setCartPulseKey((k) => k + 1);
+      return { ok: true };
     },
-    [phoneSelection, selectedModel, visualPreviewModel]
+    [phoneSelection, resolvePhoneSpecFields]
   );
 
-  const addCustomSpecToCart = useCallback(({ name = 'Custom Studio Print', price = STORE_CONFIG.customCasePrice, printSpec }) => {
-    setCartItems((prev) => {
-      const next = [
-        {
-          cartItemId: `ci-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-          name,
-          price,
-          currency: STORE_CONFIG.currencyCode,
-          quantity: 1,
-          printSpec,
-        },
-        ...prev,
-      ];
-      storeService.saveCart(next);
-      return next;
-    });
-    setCartPulseKey((k) => k + 1);
-  }, []);
+  const addCustomSpecToCart = useCallback(
+    ({ name = 'Custom Studio Print', price = STORE_CONFIG.customCasePrice, printSpec }) => {
+      const normalizedName = normalizePrintedNameSpec(printSpec?.printedName);
+      const unitNameFee = hasActivePrintedName(normalizedName) ? STORE_CONFIG.namePrintFee : 0;
+      const finalSpec = {
+        ...printSpec,
+        printedName: normalizedName,
+      };
+
+      setCartItems((prev) => {
+        const next = [
+          {
+            cartItemId: `ci-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            name,
+            price,
+            namePrintFee: unitNameFee,
+            currency: STORE_CONFIG.currencyCode,
+            quantity: 1,
+            printSpec: finalSpec,
+          },
+          ...prev,
+        ];
+        storeService.saveCart(next);
+        return next;
+      });
+      setCartPulseKey((k) => k + 1);
+    },
+    []
+  );
+
+  /**
+   * Updates an existing cart line's per-item phone model and/or printed name,
+   * recalculates `namePrintFee` (+50 when active, 0 when removed), and merges
+   * if the edited item now matches another identical catalog line.
+   */
+  const updateCartItemSpec = useCallback(
+    (cartItemId, { itemPhone = undefined, printedName = undefined }) => {
+      setCartItems((prev) => {
+        const targetIndex = prev.findIndex((it) => it.cartItemId === cartItemId);
+        if (targetIndex === -1) return prev;
+
+        const target = prev[targetIndex];
+        const nextPhoneFields = itemPhone
+          ? resolvePhoneSpecFields(itemPhone)
+          : {
+              phoneModelId: target.printSpec?.phoneModelId ?? null,
+              phoneModelName: target.printSpec?.phoneModelName ?? visualPreviewModel.name,
+              phoneModelStatus: target.printSpec?.phoneModelStatus ?? 'selected',
+              pendingRequestId: target.printSpec?.pendingRequestId ?? null,
+            };
+
+        const nextNameSpec =
+          printedName !== undefined
+            ? normalizePrintedNameSpec(printedName)
+            : normalizePrintedNameSpec(target.printSpec?.printedName);
+
+        const nextUnitNameFee = hasActivePrintedName(nextNameSpec) ? STORE_CONFIG.namePrintFee : 0;
+
+        // Update title for custom cases when name toggles on/off
+        let nextTitle = target.name;
+        const srcType = target.printSpec?.designSource?.type;
+        if (srcType === 'custom-upload') {
+          nextTitle = 'Custom Photo Print';
+        } else if (srcType === 'custom-text-only') {
+          nextTitle = 'Custom Name Print';
+        }
+
+        const updatedSpec = {
+          ...target.printSpec,
+          ...nextPhoneFields,
+          printedName: nextNameSpec,
+        };
+
+        const updatedItem = {
+          ...target,
+          name: nextTitle,
+          namePrintFee: nextUnitNameFee,
+          printSpec: updatedSpec,
+        };
+
+        // Merge if another line in the cart now has identical catalog spec
+        const duplicateIndex = prev.findIndex(
+          (other, idx) =>
+            idx !== targetIndex && arePrintSpecsMergeable(other.printSpec, updatedSpec)
+        );
+
+        let next;
+        if (duplicateIndex >= 0) {
+          next = prev
+            .map((item, idx) =>
+              idx === duplicateIndex
+                ? {
+                    ...item,
+                    namePrintFee: nextUnitNameFee,
+                    quantity: item.quantity + updatedItem.quantity,
+                  }
+                : item
+            )
+            .filter((_, idx) => idx !== targetIndex);
+        } else {
+          next = prev.map((item, idx) => (idx === targetIndex ? updatedItem : item));
+        }
+
+        storeService.saveCart(next);
+        return next;
+      });
+    },
+    [resolvePhoneSpecFields, visualPreviewModel]
+  );
 
   const updateCartQuantity = useCallback((cartItemId, delta) => {
     setCartItems((prev) => {
@@ -229,27 +366,24 @@ export function StoreProvider({ children }) {
     [cartItems, phoneSelection]
   );
 
-  const cartCount = useMemo(
-    () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
-    [cartItems]
-  );
+  const {
+    count: cartCount,
+    designSubtotal: cartDesignSubtotal,
+    nameFeesSubtotal: cartNameFeesSubtotal,
+    subtotal: cartSubtotal,
+  } = useMemo(() => computeCartTotals(cartItems), [cartItems]);
 
-  const cartSubtotal = useMemo(
-    () => cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
-    [cartItems]
-  );
-
-  // Close overlays cleanly on Escape
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === 'Escape') {
-        if (isCartOpen) setIsCartOpen(false);
-        if (isModelSelectorOpen) setIsModelSelectorOpen(false);
+        if (quickAddProduct) setQuickAddProduct(null);
+        else if (isCartOpen) setIsCartOpen(false);
+        else if (isModelSelectorOpen) setIsModelSelectorOpen(false);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isCartOpen, isModelSelectorOpen]);
+  }, [isCartOpen, isModelSelectorOpen, quickAddProduct]);
 
   const value = {
     categories,
@@ -274,14 +408,21 @@ export function StoreProvider({ children }) {
     dismissFirstVisitPopover,
     selectPhoneModel,
     submitMissingPhone,
+    submitItemMissingPhone,
+    resolvePhoneSpecFields,
+    quickAddProduct,
+    setQuickAddProduct,
     cartItems,
     cartCount,
+    cartDesignSubtotal,
+    cartNameFeesSubtotal,
     cartSubtotal,
     cartPulseKey,
     isCartOpen,
     setIsCartOpen,
     addCatalogProductToCart,
     addCustomSpecToCart,
+    updateCartItemSpec,
     updateCartQuantity,
     removeCartItem,
     clearCart,

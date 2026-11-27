@@ -4,6 +4,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { CartDrawer } from '../components/cart/CartDrawer';
 import { Header } from '../components/header/Header';
 import { Footer } from '../components/home/Footer';
+import { QuickAddPhoneModal } from '../components/product/QuickAddPhoneModal';
 import { STORE_CONFIG } from '../config/store';
 import { storeService } from '../services/storeService';
 
@@ -87,6 +88,7 @@ export function MainLayout() {
       </motion.main>
       <Footer />
       <CartDrawer />
+      <QuickAddPhoneModal />
     </div>
   );
 }

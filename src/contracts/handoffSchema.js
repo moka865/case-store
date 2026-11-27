@@ -129,6 +129,8 @@ export function getMissingModelStatusLabel(statusId) {
 
 /**
  * Runtime contract validator for an Order snapshot object.
+ * Supports additive per-item `namePrintFee` and `pricing.designSubtotal` / `pricing.namePrintFees`
+ * while preserving full Version 1 compatibility with `case-store-admin`.
  */
 export function validateOrderRecord(order) {
   if (!order || typeof order !== 'object') return false;
@@ -138,7 +140,14 @@ export function validateOrderRecord(order) {
   if (!order.customer || typeof order.customer.fullName !== 'string') return false;
   if (!EGYPT_MOBILE_REGEX.test(String(order.customer.mobileNumber || ''))) return false;
   if (!Array.isArray(order.items) || order.items.length === 0) return false;
+  for (const item of order.items) {
+    if (typeof item.unitPrice !== 'number') return false;
+    if (item.namePrintFee !== undefined && typeof item.namePrintFee !== 'number') return false;
+  }
   if (!order.pricing || typeof order.pricing.total !== 'number') return false;
+  if (order.pricing.namePrintFees !== undefined && typeof order.pricing.namePrintFees !== 'number') {
+    return false;
+  }
   return true;
 }
 
