@@ -199,7 +199,7 @@ export function validateHandoffPayload(raw) {
   if (validOrders.length === 0 && validRequests.length === 0) {
     return {
       ok: false,
-      error: 'مفيش أي سجل سليم في الملف. اتأكد إنه متصدّر من متجر غلاف.',
+      error: 'مفيش أي سجل سليم في الملف. اتأكد إنه متصدر من متجر غلاف.',
     };
   }
 

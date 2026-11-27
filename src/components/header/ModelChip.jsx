@@ -17,7 +17,7 @@ export function ModelChip() {
           onClick={() => setIsModelSelectorOpen(true)}
           className="font-bold text-[var(--brand)] underline underline-offset-4 cursor-pointer"
         >
-          غيّر
+          غير
         </button>
       </div>
     );
@@ -38,7 +38,7 @@ export function ModelChip() {
           onClick={() => setIsModelSelectorOpen(true)}
           className="font-bold text-[var(--brand)] underline underline-offset-4 cursor-pointer"
         >
-          غيّر
+          غير
         </button>
       </div>
     );

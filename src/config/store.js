@@ -4,7 +4,7 @@
  */
 export const STORE_CONFIG = {
   name: 'غلاف',
-  taglineAr: 'طبعات قاهرية على مقاس موبايلك بالملّي',
+  taglineAr: 'طبعات قاهرية على مقاس موبايلك بالملي',
   siteUrl: 'https://ghilaf.eg',
   currencyLabel: 'ج.م',
   currencyCode: 'EGP',
@@ -17,7 +17,7 @@ export const STORE_CONFIG = {
   defaultPreviewModelId: 'iphone-16-pro',
   contact: {
     supportNoteAr: 'خدمة العملاء بتكلمك تأكد الموديل والعنوان قبل الطباعة',
-    hoursAr: 'يومياً ١١ ص – ١٠ م',
+    hoursAr: 'يوميا ١١ ص – ١٠ م',
   },
   /**
    * Demo-only handoff flag for local JSON export into `../case-store-admin`.

@@ -158,7 +158,7 @@ export function MissingPhoneRequestForm({
             setPhoneNameInput(e.target.value);
             setFormErrors((prev) => ({ ...prev, phoneName: undefined }));
           }}
-          placeholder="مثلاً: Nothing Phone 2a"
+          placeholder="مثلا: Nothing Phone 2a"
           aria-invalid={Boolean(formErrors.phoneName)}
           className="min-h-[44px] w-full rounded-[var(--radius-ui)] border border-[var(--border-strong)] bg-[var(--surface)] px-3 text-[14.5px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
         />
@@ -423,7 +423,7 @@ export function PhoneModelFields({
               <bdi dir="ltr" className="latin-title">
                 {selectedModelObj.name}
               </bdi>{' '}
-              حالياً. اختار موديل تاني أو صمّم جرابك بصورتك.
+              حاليا. اختار موديل تاني أو صمم جرابك بصورتك.
             </p>
           ) : null}
 

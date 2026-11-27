@@ -216,8 +216,8 @@ export function SalonHangGrid({
           <div className="rounded-[var(--radius-stage)] border border-[var(--border-subtle)] bg-[var(--surface)] p-6 sm:p-8 text-start">
             <p className="type-h3 max-w-[60ch] text-[var(--ink)]">
               {activeSearch.trim()
-                ? 'مفيش تصميمات بالاسم ده دلوقتي. جرّب كلمة تانية أو ارفع تصميمك.'
-                : 'مفيش تصميمات للموديل ده لسه. جرّب موبايل تاني أو ارفع تصميمك.'}
+                ? 'مفيش تصميمات بالاسم ده دلوقتي. جرب كلمة تانية أو ارفع تصميمك.'
+                : 'مفيش تصميمات للموديل ده لسه. جرب موبايل تاني أو ارفع تصميمك.'}
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-4">
               {activeSearch.trim() ? (

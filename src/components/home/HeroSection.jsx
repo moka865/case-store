@@ -101,7 +101,7 @@ export function HeroSection() {
                       {selectedModel.name}
                     </bdi>
                   </span>
-                  <span className="text-[var(--brand)] underline underline-offset-4">غيّر</span>
+                  <span className="text-[var(--brand)] underline underline-offset-4">غير</span>
                 </button>
               ) : (
                 <button
@@ -130,7 +130,7 @@ export function HeroSection() {
                 <ForwardArrowRtlIcon className="h-4 w-4" />
               </Link>
               <Link to="/customize" className="btn-outline">
-                صمّم جرابك
+                صمم جرابك
               </Link>
             </div>
 

@@ -34,7 +34,7 @@ function getDocumentTitle(pathname) {
     const product = storeService.getProductBySlug(slug);
     return product ? `جراب ${product.name} — ${brand}` : `تفاصيل الجراب — ${brand}`;
   }
-  if (pathname === '/customize') return `صمّم جرابك بنفسك — ${brand}`;
+  if (pathname === '/customize') return `صمم جرابك بنفسك — ${brand}`;
   if (pathname === '/how-it-works') return `إزاي تطلب والشحن — ${brand}`;
   if (pathname === '/checkout') return `تأكيد الطلب — ${brand}`;
   return `الصفحة مش موجودة — ${brand}`;

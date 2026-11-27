@@ -200,7 +200,7 @@ export function NamePrintControl({
               value={state.text}
               onChange={(e) => update({ text: e.target.value })}
               dir={detectedScript === 'arabic' ? 'rtl' : 'ltr'}
-              placeholder="مثلاً: يوسف أو Youssef"
+              placeholder="مثلا: يوسف أو Youssef"
               aria-invalid={Boolean(error)}
               className="min-h-[46px] w-full rounded-[var(--radius-ui)] border border-[var(--border-strong)] bg-[var(--paper)] px-3.5 text-[15.5px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
             />

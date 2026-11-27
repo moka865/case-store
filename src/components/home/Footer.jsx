@@ -62,7 +62,7 @@ export function Footer() {
               </li>
               <li>
                 <Link to="/customize" className="text-white/80 hover:text-white transition-colors">
-                  صمّم جرابك
+                  صمم جرابك
                 </Link>
               </li>
               <li>

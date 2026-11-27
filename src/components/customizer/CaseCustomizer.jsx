@@ -27,7 +27,7 @@ const INITIAL_TRANSFORM = {
 };
 
 /**
- * Reusable Case Customizer ("صمّم جرابك" flow):
+ * Reusable Case Customizer ("صمم جرابك" flow):
  * Shares both `<PhoneModelFields />` (per-item phone model) and `<NamePrintControl />`
  * ("اسمك على الجراب (اختياري · +50 جنيه)") with `ProductDetailPage`, applying the single
  * `STORE_CONFIG.namePrintFee` (+50 EGP) whenever a printed name is enabled.
@@ -188,7 +188,7 @@ export function CaseCustomizer({
     const hasName = normalizedNameSpec.enabled;
 
     if (!hasImage && !hasName) {
-      setValidationMessage('ارفع صورة أو فعّل اختيار الاسم واكتبه الأول عشان نجهز الجراب.');
+      setValidationMessage('ارفع صورة أو فعل اختيار الاسم واكتبه الأول عشان نجهز الجراب.');
       return;
     }
 
@@ -248,7 +248,7 @@ export function CaseCustomizer({
         {!hideHeader ? (
           <div className="mb-[var(--heading-to-content)] text-start">
             <h2 id="customizer-heading" className="type-h1 text-[var(--ink)]">
-              صمّم جرابك بنفسك
+              صمم جرابك بنفسك
             </h2>
             <p className="type-body mt-2.5 max-w-[60ch] text-[var(--ink-muted)]">
               ارفع صورتك واكتب اسمك لو حابب. فريق التصميم عندنا بيظبط القص ومكان الكاميرا قبل الطباعة.
@@ -368,13 +368,13 @@ export function CaseCustomizer({
                     onClick={() => fileInputRef.current?.click()}
                     className="btn-outline !min-h-[40px] !px-4 !text-[14px] shrink-0"
                   >
-                    {imageUrl ? 'غيّر الصورة' : 'اختار صورة'}
+                    {imageUrl ? 'غير الصورة' : 'اختار صورة'}
                   </button>
                 </div>
               </div>
 
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-                <span className="type-caption text-[12.5px]">أو جرّب بصورة جاهزة:</span>
+                <span className="type-caption text-[12.5px]">أو جرب بصورة جاهزة:</span>
                 {SAMPLE_CUSTOM_IMAGES.map((sample) => (
                   <button
                     key={sample.id}
@@ -508,7 +508,7 @@ export function CaseCustomizer({
                     onClick={() => setTransform(INITIAL_TRANSFORM)}
                     className="btn-secondary !min-h-[34px] !text-[13.5px] text-[var(--ink-muted)]"
                   >
-                    رجّع الصورة لمكانها
+                    رجع الصورة لمكانها
                   </button>
                 </div>
               ) : null}
