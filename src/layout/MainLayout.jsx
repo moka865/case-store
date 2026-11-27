@@ -22,7 +22,7 @@ function getRouteGroup(pathname) {
 
 function getDocumentTitle(pathname) {
   const brand = STORE_CONFIG.name;
-  if (pathname === '/') return `${brand} — جرابات مطبوعة على مقاس موبايلك`;
+  if (pathname === '/') return brand;
   if (pathname === '/categories') return `الأقسام — ${brand}`;
   if (pathname.startsWith('/categories/')) {
     const slug = pathname.slice('/categories/'.length);
