@@ -9,7 +9,7 @@ import { STORE_CONFIG } from '../config/store';
 export const TERMS_INTRO = {
   title: 'الشروط والأحكام',
   subtitle: 'الاستبدال، مدة التنفيذ، والعربون.',
-  closing: 'شكرا لثقتك فينا · فريق جراباتكم',
+  closing: `شكرا لثقتك فينا · فريق ${STORE_CONFIG.name}`,
 };
 
 export const TERMS_HIGHLIGHTS = [
