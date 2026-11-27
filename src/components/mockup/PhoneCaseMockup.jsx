@@ -165,6 +165,8 @@ export function PhoneCaseMockup({
   artworkNode = null,
   customImage = null,
   printedName = null,
+  shadow = true,
+  interactive = true,
   className = '',
   style = undefined,
   onPointerDown = undefined,
@@ -178,6 +180,17 @@ export function PhoneCaseMockup({
   const cornerRadius = model?.cornerRadius ?? 34;
   const cameraLayout = model?.cameraLayout ?? 'apple-pro-triple';
   const aspectRatio = model?.aspectRatio ?? 0.48;
+
+  const shadowClass =
+    shadow === false
+      ? ''
+      : shadow === 'sm'
+        ? 'case-wall-shadow-sm'
+        : shadow === 'md'
+          ? 'case-wall-shadow-md'
+          : shadow === 'lg'
+            ? 'case-wall-shadow-lg'
+            : 'case-wall-shadow';
 
   // Map placement to safe visual band inside the printed back face
   const nameTopPercent =
@@ -193,7 +206,7 @@ export function PhoneCaseMockup({
   return (
     <div
       dir="ltr"
-      className={`relative select-none ${className}`}
+      className={`relative select-none ${interactive ? 'case-lift-self' : ''} ${className}`}
       style={{
         aspectRatio: `${aspectRatio}`,
         containerType: 'inline-size',
@@ -205,12 +218,16 @@ export function PhoneCaseMockup({
       role={ariaLabel ? 'img' : undefined}
       aria-label={ariaLabel}
     >
-      {/* Physical hardware shell SVG (outer rim + side buttons + clipped artwork) */}
-      <svg
-        viewBox="-6 -4 252 508"
-        className="block w-full h-full overflow-visible"
-        preserveAspectRatio="xMidYMid meet"
-      >
+      {/* Inner transform layer lifts the hardware shell + printed name together without layout shift */}
+      <div className={`relative w-full h-full ${interactive ? 'case-lift-motion' : ''}`}>
+        {/* Physical hardware shell SVG (outer rim + side buttons + clipped artwork + silhouette wall shadow) */}
+        <svg
+          viewBox="-6 -4 252 508"
+          className={`block w-full h-full overflow-visible ${shadowClass} ${
+            interactive && shadow !== false ? 'case-lift-shadow' : ''
+          }`}
+          preserveAspectRatio="xMidYMid meet"
+        >
         <defs>
           <clipPath id={clipId}>
             <rect x="6" y="6" width="228" height="488" rx={Math.max(8, cornerRadius - 4)} />
@@ -312,6 +329,7 @@ export function PhoneCaseMockup({
           </span>
         </div>
       ) : null}
+      </div>
     </div>
   );
 }

@@ -6,13 +6,13 @@ import { PageHeading } from '../components/common/PageHeading';
  */
 export function NotFoundPage() {
   return (
-    <section className="py-20 md:py-32">
+    <section className="page-band-single">
       <div className="page-container">
         <PageHeading
           title="الصفحة دي مش موجودة"
           description="ممكن الرابط يكون اتغير أو اتكتب غلط. ارجع للرئيسية أو شوف الجرابات المتاحة دلوقتي."
         />
-        <div className="mt-8 flex flex-wrap items-center gap-6">
+        <div className="mt-6 flex flex-wrap items-center gap-6">
           <Link to="/" className="btn-primary">
             ارجع للرئيسية
           </Link>

@@ -1,174 +1,94 @@
-import { useMemo, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { STORE_CONFIG } from '../../config/store';
 import { useStore } from '../../context/StoreContext';
 import { storeService } from '../../services/storeService';
 import { ModelChip } from '../header/ModelChip';
-import { CheckIcon } from '../icons/Icons';
-import { PhoneCaseMockup } from '../mockup/PhoneCaseMockup';
+import { ForwardArrowRtlIcon } from '../icons/Icons';
+import { ProductCard } from '../product/ProductCard';
 
-const EASE = [0.22, 1, 0.36, 1];
+function getColsForWidth(width) {
+  if (width >= 1800) return 6;
+  if (width >= 1360) return 5;
+  if (width >= 1024) return 4;
+  if (width >= 680) return 3;
+  return 2;
+}
 
-// Explicit Tailwind desktop column spans so JIT compiles all three salon-hang widths
-const SPAN_CLASSES = {
-  3: 'md:col-span-3',
-  4: 'md:col-span-4',
-  5: 'md:col-span-5',
-};
-
-// Proportional gallery scale matching the column span (3-col tighter, 5-col centerpiece)
-const MOCKUP_WIDTH_CLASSES = {
-  3: 'w-full max-w-[228px]',
-  4: 'w-full max-w-[248px]',
-  5: 'w-full max-w-[274px]',
-};
-
-// Deliberate vertical offsets for desktop salon-hang rhythm (no uniform rows)
-const DESKTOP_OFFSET_CLASSES = [
-  'md:mt-0',
-  'md:mt-16',
-  'md:mt-6',
-  'md:mt-4',
-  'md:mt-14',
-  'md:mt-8',
-  'md:mt-0',
-  'md:mt-16',
-  'md:mt-6',
-  'md:mt-4',
-  'md:mt-14',
-  'md:mt-0',
-  'md:mt-10',
-  'md:mt-2',
-];
-
-function SalonCaseItem({ product, index, displayModel, onAdd }) {
-  const [justAdded, setJustAdded] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
-
-  const span = product.salonSpan || 4;
-  const spanClass = SPAN_CLASSES[span] || SPAN_CLASSES[4];
-  const widthClass = MOCKUP_WIDTH_CLASSES[span] || MOCKUP_WIDTH_CLASSES[4];
-  const desktopOffsetClass = DESKTOP_OFFSET_CLASSES[index % DESKTOP_OFFSET_CLASSES.length];
-  // Mobile 2-column subtle stagger on the second column
-  const mobileStaggerClass = index % 2 === 1 ? 'mt-8 md:mt-0' : '';
-
-  const handleAdd = () => {
-    onAdd(product);
-    setJustAdded(true);
-    window.setTimeout(() => {
-      setJustAdded(false);
-    }, 1200);
-  };
-
-  return (
-    <motion.article
-      layout={!prefersReducedMotion}
-      initial={prefersReducedMotion ? false : { opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-      transition={{
-        layout: { duration: 0.4, ease: EASE },
-        opacity: { duration: 0.25, ease: EASE },
-      }}
-      className={`flex flex-col items-start ${spanClass} ${mobileStaggerClass} ${desktopOffsetClass}`}
-    >
-      {/* Case sits directly on the plaster wall — NO box, NO border, NO shadow, NO hover lift */}
-      <div className={widthClass}>
-        <PhoneCaseMockup
-          model={displayModel}
-          artworkId={product.artworkId}
-          className="w-full"
-          ariaLabel={`جراب ${product.name} لموبايل ${displayModel.name}`}
-        />
-
-        {/* Quiet gallery caption: product name + price on row 1, "ضيف للسلة" on row 2 */}
-        <div className="mt-4 text-start">
-          <div className="flex items-baseline justify-between gap-x-2 gap-y-1">
-            <h3 className="min-w-0 text-start text-[15px] font-medium leading-[1.35] text-[var(--charcoal)] sm:text-[17px] sm:leading-[1.4]">
-              <bdi dir="ltr">{product.name}</bdi>
-            </h3>
-            <span className="shrink-0 text-[14px] font-semibold tabular-nums text-[var(--charcoal)] sm:text-[16px]">
-              {product.price} {STORE_CONFIG.currencyLabel}
-            </span>
-          </div>
-
-          <div className="mt-0.5">
-            <button
-              type="button"
-              onClick={handleAdd}
-              className="btn-secondary !min-h-[44px] !px-0 !text-[14px] sm:!text-[15px]"
-              aria-live="polite"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {justAdded ? (
-                  <motion.span
-                    key="added"
-                    initial={prefersReducedMotion ? false : { opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={prefersReducedMotion ? undefined : { opacity: 0, y: -4 }}
-                    transition={{ duration: 0.3, ease: EASE }}
-                    className="inline-flex items-center gap-1 font-semibold text-[var(--klein)] no-underline"
-                  >
-                    <CheckIcon className="h-4 w-4" />
-                    <span>اتضاف</span>
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="add"
-                    initial={prefersReducedMotion ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-                    transition={{ duration: 0.2, ease: EASE }}
-                  >
-                    ضيف للسلة
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </button>
-          </div>
-        </div>
-      </div>
-    </motion.article>
+function useResponsiveCols() {
+  const [cols, setCols] = useState(() =>
+    typeof window === 'undefined' ? 4 : getColsForWidth(window.innerWidth)
   );
+
+  useEffect(() => {
+    const sync = () => {
+      const next = getColsForWidth(window.innerWidth);
+      setCols((prev) => (prev === next ? prev : next));
+    };
+    sync();
+    window.addEventListener('resize', sync);
+    return () => window.removeEventListener('resize', sync);
+  }, []);
+
+  return cols;
 }
 
 /**
- * Salon hang product grid directly on the plaster wall.
- * Reused on `/` (short 6-item trending preview) and `/categories` (full filtered catalog).
- * Reflows with Motion layout animation (400ms) whenever phone model, category, or search changes.
+ * Unified responsive product grid for غلاف.
+ * Every product card uses the same fixed `--card-bg` stage background,
+ * scaling columns up on wide screens (2 -> 3 -> 4 -> 5 -> 6).
  */
 export function SalonHangGrid({
   categoryId = null,
   limit = null,
+  previewRows = null,
   showViewAllLink = false,
+  showQuickCategories = false,
   ignoreSearch = false,
   headingText = null,
   compactTop = false,
 }) {
   const {
     categories,
+    categoryCounts,
     searchQuery,
     setSearchQuery,
     phoneSelection,
+    selectedModel,
     visualPreviewModel,
     setIsModelSelectorOpen,
     addCatalogProductToCart,
   } = useStore();
 
+  const cols = useResponsiveCols();
+  const [localCategoryId, setLocalCategoryId] = useState(null);
+
+  const effectiveCategoryId = showQuickCategories ? localCategoryId : categoryId;
   const activeSearch = ignoreSearch ? '' : searchQuery;
 
-  const products = useMemo(() => {
-    const allMatching = storeService.getProducts({
+  const categoryNameMap = useMemo(
+    () => Object.fromEntries(categories.map((c) => [c.id, c.nameAr])),
+    [categories]
+  );
+
+  const allMatching = useMemo(() => {
+    return storeService.getProducts({
       modelId: phoneSelection.modelId,
       modelStatus: phoneSelection.status,
-      categoryId,
+      categoryId: effectiveCategoryId,
       searchQuery: activeSearch,
     });
-    return limit ? allMatching.slice(0, limit) : allMatching;
-  }, [phoneSelection.modelId, phoneSelection.status, categoryId, activeSearch, limit]);
+  }, [phoneSelection.modelId, phoneSelection.status, effectiveCategoryId, activeSearch]);
 
-  const activeCategory = categories.find((c) => c.id === categoryId);
+  const products = useMemo(() => {
+    if (previewRows) {
+      const targetCount = Math.max(6, previewRows * cols);
+      return allMatching.slice(0, targetCount);
+    }
+    return limit ? allMatching.slice(0, limit) : allMatching;
+  }, [allMatching, limit, previewRows, cols]);
+
+  const activeCategory = categories.find((c) => c.id === effectiveCategoryId);
 
   const sectionHeading = activeSearch.trim()
     ? `نتايج البحث عن "${activeSearch.trim()}"`
@@ -179,41 +99,101 @@ export function SalonHangGrid({
       id="designs"
       aria-labelledby="designs-heading"
       className={`scroll-mt-[var(--header-offset)] ${
-        compactTop ? 'pt-4 pb-16 md:pt-8 md:pb-28' : 'py-16 md:py-28'
+        compactTop
+          ? 'pt-[var(--heading-to-content)] pb-[var(--section-pad-y)]'
+          : 'section-band'
       }`}
     >
       <div className="page-container">
-        {/* Top bar: section heading + pill phone-model chip */}
-        <div className="mb-12 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center md:mb-16">
-          <div className="flex flex-wrap items-baseline gap-4">
-            <h2 id="designs-heading" className="type-h2 text-[var(--charcoal)]">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <h2 id="designs-heading" className="type-h2 text-[var(--ink)]">
               {sectionHeading}
             </h2>
-            {!ignoreSearch && (activeCategory || activeSearch.trim()) ? (
+            <ModelChip />
+            {!ignoreSearch && (categoryId || activeSearch.trim()) ? (
               <Link
                 to="/categories"
                 onClick={() => setSearchQuery('')}
-                className="btn-secondary !text-[15px] text-[var(--graphite)]"
+                className="btn-secondary !min-h-[36px] !text-[14px] text-[var(--ink-muted)]"
               >
                 عرض الكل
               </Link>
             ) : null}
           </div>
 
-          <ModelChip />
+          {showViewAllLink ? (
+            <Link
+              to="/categories"
+              className="hidden sm:inline-flex items-center gap-1.5 text-[14.5px] font-bold text-[var(--ink)] hover:text-[var(--brand)] transition-colors"
+            >
+              <span>كل الجرابات ({categoryCounts.all ?? 14})</span>
+              <ForwardArrowRtlIcon className="h-4 w-4" />
+            </Link>
+          ) : null}
         </div>
 
-        {/* Salon hang grid or friendly actionable empty state */}
+        {showQuickCategories ? (
+          <div
+            role="tablist"
+            aria-label="فلترة سريعة حسب القسم"
+            className="no-scrollbar mb-[var(--heading-to-content)] flex items-center gap-2 overflow-x-auto pb-1"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={localCategoryId === null}
+              onClick={() => setLocalCategoryId(null)}
+              className={`inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[13.5px] font-bold transition-colors cursor-pointer ${
+                localCategoryId === null
+                  ? 'border-[var(--ink)] bg-[var(--ink)] text-white'
+                  : 'border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--card-bg)]'
+              }`}
+            >
+              <span>الكل</span>
+              <span className="text-[12px] opacity-75 tabular-nums">{categoryCounts.all ?? 0}</span>
+            </button>
+
+            {categories.map((cat) => {
+              const isSelected = localCategoryId === cat.id;
+              const count = categoryCounts[cat.id] ?? 0;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => setLocalCategoryId(cat.id)}
+                  className={`inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[13.5px] font-bold transition-colors cursor-pointer ${
+                    isSelected
+                      ? 'border-[var(--ink)] bg-[var(--ink)] text-white'
+                      : 'border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--card-bg)]'
+                  }`}
+                >
+                  <span>{cat.nameAr}</span>
+                  <span className="text-[12px] opacity-70 tabular-nums">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+
         {products.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 items-start gap-x-5 gap-y-12 md:grid-cols-12 md:gap-x-8 md:gap-y-16">
+            <div
+              className="grid gap-x-[var(--grid-col-gap)] gap-y-[var(--grid-row-gap)]"
+              style={{
+                gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+              }}
+            >
               <AnimatePresence mode="popLayout">
-                {products.map((product, index) => (
-                  <SalonCaseItem
+                {products.map((product) => (
+                  <ProductCard
                     key={product.id}
                     product={product}
-                    index={index}
+                    categoryNameAr={categoryNameMap[product.categoryId] || ''}
                     displayModel={visualPreviewModel}
+                    selectedModel={selectedModel}
                     onAdd={addCatalogProductToCart}
                   />
                 ))}
@@ -221,21 +201,25 @@ export function SalonHangGrid({
             </div>
 
             {showViewAllLink ? (
-              <div className="mt-14 text-start md:mt-20">
-                <Link to="/categories" className="btn-secondary text-[17px]">
-                  شوف كل الجرابات
+              <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border-subtle)] pt-5">
+                <p className="type-caption text-[14px]">
+                  كل الجرابات بتتطبع مطفي ضد البصمات وبمقاس فتحة كاميرا موبايلك بالظبط.
+                </p>
+                <Link to="/categories" className="btn-outline !min-h-[44px]">
+                  <span>شوف كل الجرابات ({categoryCounts.all ?? 14})</span>
+                  <ForwardArrowRtlIcon className="h-4 w-4" />
                 </Link>
               </div>
             ) : null}
           </>
         ) : (
-          <div className="max-w-[46ch] py-12 text-start">
-            <p className="type-h3 text-[var(--charcoal)]">
+          <div className="rounded-[var(--radius-stage)] border border-[var(--border-subtle)] bg-[var(--surface)] p-6 sm:p-8 text-start">
+            <p className="type-h3 max-w-[60ch] text-[var(--ink)]">
               {activeSearch.trim()
                 ? 'مفيش تصميمات بالاسم ده دلوقتي. جرّب كلمة تانية أو ارفع تصميمك.'
                 : 'مفيش تصميمات للموديل ده لسه. جرّب موبايل تاني أو ارفع تصميمك.'}
             </p>
-            <div className="mt-6 flex flex-wrap items-center gap-6">
+            <div className="mt-5 flex flex-wrap items-center gap-4">
               {activeSearch.trim() ? (
                 <button
                   type="button"
@@ -243,6 +227,14 @@ export function SalonHangGrid({
                   className="btn-primary"
                 >
                   امسح البحث
+                </button>
+              ) : localCategoryId ? (
+                <button
+                  type="button"
+                  onClick={() => setLocalCategoryId(null)}
+                  className="btn-primary"
+                >
+                  اعرض كل الأقسام
                 </button>
               ) : (
                 <button
@@ -253,7 +245,7 @@ export function SalonHangGrid({
                   اختار موبايل تاني
                 </button>
               )}
-              <Link to="/customize" className="btn-secondary">
+              <Link to="/customize" className="btn-outline">
                 ارفع تصميمك
               </Link>
             </div>

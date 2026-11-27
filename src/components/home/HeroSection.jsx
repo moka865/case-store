@@ -1,29 +1,30 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  AnimatePresence,
   motion,
   useMotionValue,
   useReducedMotion,
   useSpring,
 } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { STORE_CONFIG } from '../../config/store';
 import { useStore } from '../../context/StoreContext';
-import { CaseArtwork } from '../mockup/CaseArtworks';
-import { PhoneCaseMockup } from '../mockup/PhoneCaseMockup';
+import { CashCodIcon, ForwardArrowRtlIcon, PhoneHardwareIcon } from '../icons/Icons';
 
 const EASE = [0.22, 1, 0.36, 1];
 const CROSSFADE_INTERVAL_MS = 4000;
 
 /**
- * Hero section — the single signature bold moment on the page.
- * - Massive Arabic display headline interacting with / tucking behind the case mockup
- * - Entrance tilt settling to rest (700ms)
- * - Print cross-fading across 4 featured designs every 4s (600ms), paused when tab is hidden
- * - Cursor-follow tilt max ±6° on pointer devices; slow float on touch devices
- * - Respects prefers-reduced-motion
+ * Hero section — restores the original `heroCases` PNG cutouts (`Persian Stallions`,
+ * `Morning Shift Edition`, `Starry Night`) on the unified fixed `--card-bg` stage,
+ * paired with clean, modern `Cairo` display headlines and clear brand CTAs.
  */
 export function HeroSection() {
-  const { heroProducts, visualPreviewModel } = useStore();
+  const {
+    heroCases,
+    allPhoneModels,
+    selectedModel,
+    setIsModelSelectorOpen,
+  } = useStore();
   const prefersReducedMotion = useReducedMotion();
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -32,7 +33,7 @@ export function HeroSection() {
   );
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
-  const sectionRef = useRef(null);
+  const stageRef = useRef(null);
 
   // Cursor-follow tilt motion values (±6 deg max)
   const rawRotateX = useMotionValue(0);
@@ -56,22 +57,21 @@ export function HeroSection() {
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
-  // Cross-fade through featured designs every 4s; pause when tab hidden
   useEffect(() => {
-    if (!isTabVisible || heroProducts.length <= 1) return;
-    const timer = window.setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % heroProducts.length);
+    if (!isTabVisible || heroCases.length <= 1 || prefersReducedMotion) return;
+    const timer = window.setTimeout(() => {
+      setActiveIndex((prev) => (prev + 1) % heroCases.length);
     }, CROSSFADE_INTERVAL_MS);
-    return () => window.clearInterval(timer);
-  }, [isTabVisible, heroProducts.length]);
+    return () => window.clearTimeout(timer);
+  }, [isTabVisible, heroCases.length, activeIndex, prefersReducedMotion]);
 
   const handlePointerMove = (e) => {
-    if (prefersReducedMotion || isTouchDevice || !sectionRef.current) return;
-    const rect = sectionRef.current.getBoundingClientRect();
-    const nx = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
-    const ny = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
-    rawRotateY.set(nx * 12); // max ±6 deg
-    rawRotateX.set(-ny * 12); // max ±6 deg
+    if (prefersReducedMotion || isTouchDevice || !stageRef.current) return;
+    const rect = stageRef.current.getBoundingClientRect();
+    const nx = (e.clientX - rect.left) / rect.width - 0.5;
+    const ny = (e.clientY - rect.top) / rect.height - 0.5;
+    rawRotateY.set(nx * 12);
+    rawRotateX.set(-ny * 12);
   };
 
   const handlePointerLeave = () => {
@@ -79,141 +79,215 @@ export function HeroSection() {
     rawRotateY.set(0);
   };
 
-  const currentHeroProduct = heroProducts[activeIndex] || heroProducts[0];
+  const currentHeroCase = heroCases[activeIndex] || heroCases[0];
 
   return (
-    <section
-      ref={sectionRef}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      className="relative pt-8 pb-16 md:pt-14 md:pb-28"
-    >
+    <section className="pt-4 pb-[var(--section-pad-y)] sm:pt-6 lg:pt-7">
       <div className="page-container">
-        {/*
-          Gallery wall hero composition:
-          Oversized Arabic display typography acts as a sculptural poster on the wall,
-          interacting directly with the large phone case pulled inward into the center-end
-          plane (eliminating the generic 50/50 split gap and leaving clean plaster space
-          under the top-left model selector popover).
-        */}
-        <div className="relative grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-0">
-          {/* Sculptural display headline on start side */}
-          <div className="relative z-10 text-start lg:col-span-7 lg:col-start-1 lg:row-start-1">
-            <h1 tabIndex={-1} className="type-display text-[var(--charcoal)] outline-none">
-              <span className="block">شكّل موبايلك</span>
-              <span className="block lg:ps-24">على مزاجك</span>
+        <div className="grid grid-cols-1 items-center gap-y-7 lg:grid-cols-12 lg:gap-x-[var(--grid-col-gap)]">
+          {/* START COLUMN (Cols 1-6): Clean Modern Cairo Headline + Primary/Secondary CTAs */}
+          <div className="text-start lg:col-span-6">
+            <div className="mb-4">
+              {selectedModel ? (
+                <button
+                  type="button"
+                  onClick={() => setIsModelSelectorOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] px-3.5 py-1.5 text-[13px] font-bold text-[var(--ink)] hover:border-[var(--ink)] cursor-pointer"
+                >
+                  <span className="h-2 w-2 rounded-full bg-[var(--jade)]" aria-hidden="true" />
+                  <span>
+                    جاهز لمقاس{' '}
+                    <bdi dir="ltr" className="latin-title">
+                      {selectedModel.name}
+                    </bdi>
+                  </span>
+                  <span className="text-[var(--brand)] underline underline-offset-4">غيّر</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsModelSelectorOpen(true)}
+                  className="badge-brand-yellow hover:bg-[var(--brand-yellow-hover)] transition-colors cursor-pointer"
+                >
+                  <PhoneHardwareIcon className="h-3.5 w-3.5" />
+                  <span>متاح لـ {allPhoneModels.length} موديل موبايل — اختار موبايلك</span>
+                </button>
+              )}
+            </div>
+
+            <h1 tabIndex={-1} className="type-display text-[var(--ink)] outline-none">
+              <span className="block">جراب على مزاجك،</span>
+              <span className="mt-1 block text-[var(--brand)]">مطبوع لموبايلك بالظبط.</span>
             </h1>
 
-            <p className="type-body mt-6 max-w-[34ch] text-[var(--graphite)] lg:mt-8">
-              تصميمات مطبوعة مخصوص لموبايلك، أو ارفع صورتك واكتب اسمك واحنا نطبعها لحد باب البيت.
+            <p className="type-body mt-4 max-w-[46ch] text-[var(--ink-muted)]">
+              اختار من تصميمات غلاف الجاهزة أو ارفع صورتك واكتب اسمك. طباعة مطفية تقيلة ما بتبصمش، وتدفع كاش لما تستلم.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-6">
+            <div className="mt-6 flex flex-wrap items-center gap-3.5 sm:gap-4">
               <Link to="/categories" className="btn-primary">
-                شوف الجرابات
+                <span>شوف الجرابات</span>
+                <ForwardArrowRtlIcon className="h-4 w-4" />
               </Link>
-              <Link to="/customize" className="btn-secondary">
-                صمم جرابك
+              <Link to="/customize" className="btn-outline">
+                صمّم جرابك
               </Link>
             </div>
+
+            <dl className="mt-7 grid max-w-[520px] grid-cols-3 gap-3 border-t border-[var(--border-subtle)] pt-4">
+              <div>
+                <dt className="type-caption text-[12px]">التصميمات الجاهزة</dt>
+                <dd className="mt-0.5 text-[15px] sm:text-[16px] font-bold tabular-nums text-[var(--ink)]">
+                  من 260 {STORE_CONFIG.currencyLabel}
+                </dd>
+              </div>
+              <div className="border-s border-[var(--border-subtle)] ps-3">
+                <dt className="type-caption text-[12px]">مخصوص بصورتك</dt>
+                <dd className="mt-0.5 text-[15px] sm:text-[16px] font-bold tabular-nums text-[var(--ink)]">
+                  {STORE_CONFIG.customCasePrice} {STORE_CONFIG.currencyLabel}
+                </dd>
+              </div>
+              <div className="border-s border-[var(--border-subtle)] ps-3">
+                <dt className="type-caption text-[12px]">طريقة الدفع</dt>
+                <dd className="mt-0.5 inline-flex items-center gap-1 text-[14px] sm:text-[15px] font-bold text-[var(--jade)]">
+                  <CashCodIcon className="hidden sm:inline h-4 w-4 shrink-0" />
+                  <span>عند الاستلام</span>
+                </dd>
+              </div>
+            </dl>
           </div>
 
-          {/* Large Hero Case pulled into center-end (cols 6-10) so headline & case compose tightly and top-left popover stays clear */}
-          <div
-            className="relative z-20 flex flex-col items-center lg:col-span-4 lg:col-start-7 lg:row-start-1 lg:items-start lg:-ms-10"
-            style={{ perspective: '1100px' }}
-          >
-            <motion.div
-              initial={
-                prefersReducedMotion
-                  ? { opacity: 0 }
-                  : { opacity: 0, rotateY: -12, rotateX: 6, rotateZ: -3, y: 18 }
-              }
-              animate={
-                prefersReducedMotion
-                  ? { opacity: 1 }
-                  : { opacity: 1, rotateY: 0, rotateX: 0, rotateZ: 0, y: 0 }
-              }
-              transition={{ duration: 0.7, ease: EASE }}
-              className="w-[238px] sm:w-[272px] lg:w-[304px]"
+          {/* END COLUMN (Cols 7-12): Unified Fixed `--card-bg` Stage with Original `heroCases` PNGs */}
+          <div className="lg:col-span-6">
+            <div
+              ref={stageRef}
+              onPointerMove={handlePointerMove}
+              onPointerLeave={handlePointerLeave}
+              className="product-stage relative overflow-hidden p-5 sm:p-6 lg:p-7"
             >
-              {/* Inner tilt (desktop pointer) or slow float (touch devices) */}
-              <motion.div
-                style={
-                  prefersReducedMotion || isTouchDevice
-                    ? undefined
-                    : {
-                        rotateX,
-                        rotateY,
-                        transformStyle: 'preserve-3d',
-                      }
-                }
-                animate={
-                  !prefersReducedMotion && isTouchDevice && isTabVisible
-                    ? { y: [0, -8, 0] }
-                    : { y: 0 }
-                }
-                transition={
-                  !prefersReducedMotion && isTouchDevice && isTabVisible
-                    ? { duration: 5.5, repeat: Infinity, ease: 'easeInOut' }
-                    : { duration: 0.3 }
-                }
-              >
-                <PhoneCaseMockup
-                  model={visualPreviewModel}
-                  className="w-full"
-                  ariaLabel={`تصميم ${currentHeroProduct?.name || ''} على جراب ${visualPreviewModel?.name || ''}`}
-                  artworkNode={
-                    <AnimatePresence mode="sync" initial={false}>
-                      <motion.g
-                        key={currentHeroProduct.artworkId}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.6, ease: EASE }}
+              <div className="grid grid-cols-1 items-center gap-5 sm:grid-cols-12">
+                {/* Original transparent PNG phone case showcase */}
+                <div
+                  className="flex flex-col items-center justify-center sm:col-span-7"
+                  style={{ perspective: '1100px' }}
+                >
+                  <motion.div
+                    initial={
+                      prefersReducedMotion
+                        ? { opacity: 0 }
+                        : { opacity: 0, rotateY: -12, rotateX: 6, rotateZ: -3, y: 16 }
+                    }
+                    animate={
+                      prefersReducedMotion
+                        ? { opacity: 1 }
+                        : { opacity: 1, rotateY: 0, rotateX: 0, rotateZ: 0, y: 0 }
+                    }
+                    transition={{ duration: 0.7, ease: EASE }}
+                    className="w-[184px] sm:w-[208px] lg:w-[216px] xl:w-[234px]"
+                  >
+                    <div className="case-wall-shadow-hero" style={{ perspective: '1100px' }}>
+                      <motion.div
+                        style={
+                          prefersReducedMotion || isTouchDevice
+                            ? undefined
+                            : {
+                                rotateX,
+                                rotateY,
+                                transformStyle: 'preserve-3d',
+                                willChange: 'transform',
+                              }
+                        }
+                        animate={
+                          !prefersReducedMotion && isTouchDevice && isTabVisible
+                            ? { y: [0, -8, 0] }
+                            : { y: 0 }
+                        }
+                        transition={
+                          !prefersReducedMotion && isTouchDevice && isTabVisible
+                            ? { duration: 5.5, repeat: Infinity, ease: 'easeInOut' }
+                            : { duration: 0.3 }
+                        }
                       >
-                        <CaseArtwork artworkId={currentHeroProduct.artworkId} />
-                      </motion.g>
-                    </AnimatePresence>
-                  }
-                />
-              </motion.div>
-
-              {/* Quiet museum wall placard beneath the hero piece */}
-              <div className="mt-5 flex items-center justify-between gap-4">
-                <div className="min-w-0 text-start">
-                  <p className="truncate text-[16px] font-medium text-[var(--charcoal)]">
-                    <bdi dir="ltr">{currentHeroProduct.name}</bdi>
-                  </p>
-                  <p className="type-caption">
-                    <bdi dir="ltr">{visualPreviewModel.name}</bdi>
-                  </p>
+                        <div
+                          dir="ltr"
+                          role="img"
+                          aria-label={currentHeroCase?.altAr || currentHeroCase?.name || ''}
+                          className="relative aspect-[720/1426] w-full select-none"
+                        >
+                          {heroCases.map((item, idx) => {
+                            const isActive = idx === activeIndex;
+                            return (
+                              <motion.img
+                                key={item.id}
+                                src={item.imageUrl}
+                                alt=""
+                                aria-hidden="true"
+                                draggable={false}
+                                loading={idx === 0 ? 'eager' : 'lazy'}
+                                fetchPriority={idx === 0 ? 'high' : 'auto'}
+                                decoding="async"
+                                initial={false}
+                                animate={{ opacity: isActive ? 1 : 0 }}
+                                transition={
+                                  prefersReducedMotion
+                                    ? { duration: 0.25, ease: EASE }
+                                    : isActive
+                                      ? { duration: 0.6, ease: EASE }
+                                      : { duration: 0.15, delay: 0.45, ease: EASE }
+                                }
+                                className={`pointer-events-none absolute inset-0 h-full w-full object-contain select-none ${
+                                  isActive ? 'z-20' : 'z-10'
+                                }`}
+                              />
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    </div>
+                  </motion.div>
                 </div>
 
-                {/* Minimal gallery print switcher bars */}
-                <div className="flex items-center gap-1.5" role="group" aria-label="معاينة تصميمات العرض">
-                  {heroProducts.map((item, idx) => {
-                    const isCurrent = idx === activeIndex;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => setActiveIndex(idx)}
-                        aria-label={`اعرض تصميم ${item.name}`}
-                        aria-pressed={isCurrent}
-                        className="flex h-11 w-5 items-center justify-center cursor-pointer"
-                      >
-                        <span
-                          className={`block h-[3px] w-full rounded-[4px] transition-colors duration-200 ${
-                            isCurrent ? 'bg-[var(--klein)]' : 'bg-[var(--charcoal)]/25'
+                {/* Placard & edition selector on the unified stage */}
+                <div className="flex flex-col justify-center gap-3 text-start sm:col-span-5">
+                  <p className="type-caption text-[13px]">
+                    طباعة مطفية عالية الدقة بمقاس موبايلك وفتحة كاميرته بالظبط.
+                  </p>
+
+                  <div
+                    role="group"
+                    aria-label="معاينة تصميمات العرض"
+                    className="flex flex-col gap-1.5"
+                  >
+                    {heroCases.map((item, idx) => {
+                      const isCurrent = idx === activeIndex;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setActiveIndex(idx)}
+                          aria-pressed={isCurrent}
+                          className={`flex min-h-[42px] w-full items-center gap-2.5 rounded-[var(--radius-ui)] border px-3 py-1.5 text-start transition-colors duration-150 cursor-pointer ${
+                            isCurrent
+                              ? 'border-[var(--border-strong)] bg-[var(--surface)] font-bold text-[var(--ink)]'
+                              : 'border-transparent bg-white/55 font-medium text-[var(--ink-muted)] hover:bg-[var(--surface)] hover:text-[var(--ink)]'
                           }`}
-                        />
-                      </button>
-                    );
-                  })}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={`block h-[3px] shrink-0 rounded-full transition-all duration-200 ${
+                              isCurrent ? 'w-5 bg-[var(--brand)]' : 'w-3 bg-[var(--ink)]/25'
+                            }`}
+                          />
+                          <span className="latin-title truncate text-[13.5px] sm:text-[14px]">
+                            <bdi dir="ltr">{item.name}</bdi>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

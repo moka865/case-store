@@ -8,6 +8,7 @@ import {
 } from '../contracts/handoffSchema';
 import { CATEGORIES } from '../data/categories';
 import { GOVERNORATES } from '../data/governorates';
+import { HERO_CASES } from '../data/heroCases';
 import { MATERIALS } from '../data/materials';
 import { PHONE_BRANDS, PHONE_MODELS } from '../data/phoneModels';
 import { PRODUCTS } from '../data/products';
@@ -16,6 +17,7 @@ import {
   deflateOrderImages,
   hydrateOrderImages,
 } from './imageBlobStore';
+import { computeItemPricing, normalizePrintedNameSpec } from '../utils/pricing';
 
 const STORAGE_KEYS = {
   PHONE_SELECTION: 'ghilaf_phone_selection_v1',
@@ -95,6 +97,16 @@ export const storeService = {
 
   getHeroProducts() {
     return PRODUCTS.filter((p) => p.featuredInHero);
+  },
+
+  getHeroCases() {
+    return [...HERO_CASES];
+  },
+
+  getProductBySlug(slug) {
+    if (!slug) return null;
+    const clean = String(slug).trim().toLowerCase();
+    return PRODUCTS.find((p) => (p.slug || p.id).toLowerCase() === clean) || null;
   },
 
   getProducts({ modelId = null, modelStatus = 'none', categoryId = null, searchQuery = '' } = {}) {
@@ -209,23 +221,40 @@ export const storeService = {
       const material = this.getMaterialById(
         item.printSpec?.materialId || STORE_CONFIG.defaultMaterialId
       );
+      const itemPricing = computeItemPricing(item);
+      const normalizedSpec = {
+        ...item.printSpec,
+        printedName: normalizePrintedNameSpec(item.printSpec?.printedName),
+      };
       return {
         id: `${orderId}-item-${idx + 1}`,
         title: item.name,
-        quantity: item.quantity,
-        unitPrice: item.price,
-        phoneModelName: item.printSpec?.phoneModelName || STORE_CONFIG.defaultPreviewModelId,
+        quantity: itemPricing.quantity,
+        unitPrice: itemPricing.designUnitPrice,
+        namePrintFee: itemPricing.unitNameFee,
+        phoneModelName: normalizedSpec.phoneModelName || STORE_CONFIG.defaultPreviewModelId,
         materialNameAr: material?.nameAr || 'بولي كربونات مطفي',
-        printSpec: item.printSpec,
+        printSpec: normalizedSpec,
       };
     });
 
-    const subtotal = snapshotItems.reduce((sum, it) => sum + it.unitPrice * it.quantity, 0);
+    const designSubtotal = snapshotItems.reduce(
+      (sum, it) => sum + it.unitPrice * it.quantity,
+      0
+    );
+    const namePrintFees = snapshotItems.reduce(
+      (sum, it) => sum + (it.namePrintFee || 0) * it.quantity,
+      0
+    );
+    const subtotal = designSubtotal + namePrintFees;
     const shippingFee = gov.shippingFee;
     const total = subtotal + shippingFee;
     const hasPendingModel = snapshotItems.some(
       (it) => it.printSpec?.phoneModelStatus === 'pending'
     );
+    const firstItemPendingReqId =
+      snapshotItems.find((it) => it.printSpec?.pendingRequestId)?.printSpec?.pendingRequestId ||
+      null;
 
     const fullOrder = {
       id: orderId,
@@ -233,7 +262,9 @@ export const storeService = {
       status: 'pending_confirmation',
       statusHistory: [{ status: 'pending_confirmation', at: now }],
       pendingModel: hasPendingModel,
-      missingModelRequestId: hasPendingModel ? phoneSelection?.pendingRequestId || null : null,
+      missingModelRequestId: hasPendingModel
+        ? firstItemPendingReqId || phoneSelection?.pendingRequestId || null
+        : null,
       customer: {
         fullName: customer.fullName.trim(),
         mobileNumber: customer.mobileNumber.trim(),
@@ -246,6 +277,8 @@ export const storeService = {
       },
       items: snapshotItems,
       pricing: {
+        designSubtotal,
+        namePrintFees,
         subtotal,
         shippingFee,
         total,
@@ -278,8 +311,14 @@ export const storeService = {
     if (!STORE_CONFIG.DEMO_HANDOFF) return null;
     // Resolve every per-origin idb:// ref into an inline data URL inside the envelope
     const hydratedOrder = await hydrateOrderImages(order);
-    const linkedRequests = order.missingModelRequestId
-      ? this.getMissingPhoneRequests().filter((r) => r.id === order.missingModelRequestId)
+    const reqIds = new Set(
+      [
+        order.missingModelRequestId,
+        ...(order.items || []).map((it) => it?.printSpec?.pendingRequestId),
+      ].filter(Boolean)
+    );
+    const linkedRequests = reqIds.size
+      ? this.getMissingPhoneRequests().filter((r) => reqIds.has(r.id))
       : [];
     const envelope = createHandoffEnvelope({
       orders: [hydratedOrder],
