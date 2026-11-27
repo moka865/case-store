@@ -5,4 +5,14 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   appType: 'spa',
   plugins: [react(), tailwindcss()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'motion-vendor': ['motion'],
+        },
+      },
+    },
+  },
 });

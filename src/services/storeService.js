@@ -102,6 +102,12 @@ export const storeService = {
     return [...HERO_CASES];
   },
 
+  getProductBySlug(slug) {
+    if (!slug) return null;
+    const clean = String(slug).trim().toLowerCase();
+    return PRODUCTS.find((p) => (p.slug || p.id).toLowerCase() === clean) || null;
+  },
+
   getProducts({ modelId = null, modelStatus = 'none', categoryId = null, searchQuery = '' } = {}) {
     let list = [...PRODUCTS];
 

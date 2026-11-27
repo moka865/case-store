@@ -2,16 +2,15 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { EGYPT_MOBILE_REGEX } from '../../contracts/handoffSchema';
 import { useStore } from '../../context/StoreContext';
-import { BackArrowRtlIcon, CloseIcon, SearchIcon } from '../icons/Icons';
+import { BackArrowRtlIcon, CheckIcon, CloseIcon, SearchIcon } from '../icons/Icons';
 
 const EASE = [0.22, 1, 0.36, 1];
 
 /**
  * Phone model selector:
- * - Desktop: anchored dropdown panel under the top-left selector
+ * - Desktop: anchored print-studio dropdown panel under the top-left selector
  * - Mobile: bottom sheet
- * Includes brand tabs (RTL horizontal strip), search input, model list,
- * and the persistent "موبايلي مش في القايمة" request form.
+ * Includes 7 brand tabs, live search input, model list, and "موبايلي مش في القايمة" request form.
  */
 export function ModelSelector({ open, onClose }) {
   const {
@@ -50,7 +49,6 @@ export function ModelSelector({ open, onClose }) {
 
   const wasOpenRef = useRef(false);
 
-  // Reset transient search/view state only when panel transitions from closed -> open
   useEffect(() => {
     if (open && !wasOpenRef.current) {
       setView('list');
@@ -74,12 +72,10 @@ export function ModelSelector({ open, onClose }) {
     }
   }, [open, view]);
 
-  // Close desktop dropdown on outside click
   useEffect(() => {
     if (!open || isMobileViewport) return;
     const handlePointerDown = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
-        // Ignore clicks on the trigger button itself (handled by Header toggle)
         if (e.target.closest('[data-model-selector-trigger="true"]')) return;
         onClose();
       }
@@ -126,9 +122,16 @@ export function ModelSelector({ open, onClose }) {
   };
 
   const panelBody = (
-    <div className="flex flex-col text-start" style={{ maxHeight: isMobileViewport ? '82dvh' : '520px' }}>
-      {/* Header row inside selector */}
-      <div className="flex items-center justify-between px-5 pt-4 pb-2">
+    <div className="flex flex-col text-start" style={{ maxHeight: isMobileViewport ? '84dvh' : '540px' }}>
+      {/* Mobile drag handle visual cue */}
+      {isMobileViewport ? (
+        <div className="flex justify-center pt-2.5" aria-hidden="true">
+          <span className="h-1 w-10 rounded-full bg-[var(--ink)]/20" />
+        </div>
+      ) : null}
+
+      {/* Header row */}
+      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 pt-3.5 pb-3">
         {view === 'missing-form' ? (
           <button
             type="button"
@@ -136,34 +139,41 @@ export function ModelSelector({ open, onClose }) {
               setView('list');
               setFormErrors({});
             }}
-            className="inline-flex min-h-[44px] items-center gap-2 text-[15px] font-medium text-[var(--charcoal)] hover:text-[var(--klein)] cursor-pointer"
+            className="inline-flex min-h-[40px] items-center gap-2 text-[14.5px] font-bold text-[var(--ink)] hover:text-[var(--brand)] cursor-pointer"
           >
-            <BackArrowRtlIcon className="w-4 h-4" />
+            <BackArrowRtlIcon className="h-4 w-4" />
             <span>رجوع للموديلات</span>
           </button>
         ) : (
-          <h2 className="text-[18px] font-bold text-[var(--charcoal)]">
-            {view === 'missing-confirmed' ? 'تم استلام طلبك' : 'اختار موبايلك'}
-          </h2>
+          <div>
+            <h2 className="font-[var(--font-display)] text-[19px] font-bold text-[var(--ink)]">
+              {view === 'missing-confirmed' ? 'استلمنا طلب موديلك' : 'اختار موديل موبايلك'}
+            </h2>
+            {view === 'list' ? (
+              <p className="text-[12.5px] text-[var(--ink-muted)]">
+                بنفلتر الجرابات ونظبط فتحة الكاميرا على مقاسك
+              </p>
+            ) : null}
+          </div>
         )}
 
         <button
           type="button"
           onClick={onClose}
           aria-label="إغلاق قائمة الموديلات"
-          className="flex h-11 w-11 items-center justify-center rounded-[4px] text-[var(--graphite)] hover:text-[var(--charcoal)] cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-ui)] text-[var(--ink-muted)] hover:bg-[var(--surface-warm)] hover:text-[var(--ink)] cursor-pointer"
         >
-          <CloseIcon className="w-5 h-5" />
+          <CloseIcon className="h-5 w-5" />
         </button>
       </div>
 
       {view === 'list' ? (
         <>
-          {/* Brand tabs — RTL horizontal strip on mobile, cleanly wrapped on desktop so all 7 brands stay visible */}
+          {/* Brand tabs */}
           <div
             role="tablist"
             aria-label="ماركات الموبايلات"
-            className="no-scrollbar flex items-center gap-2 overflow-x-auto px-5 py-2 md:flex-wrap md:overflow-visible"
+            className="no-scrollbar flex items-center gap-1.5 overflow-x-auto px-5 pt-3 pb-1.5 md:flex-wrap md:overflow-visible"
           >
             {phoneBrands.map((brand) => {
               const isActive = activeBrand === brand && !query.trim();
@@ -177,13 +187,13 @@ export function ModelSelector({ open, onClose }) {
                     setActiveBrand(brand);
                     setQuery('');
                   }}
-                  className={`min-h-[38px] shrink-0 rounded-[4px] px-2.5 text-[14px] font-semibold transition-colors cursor-pointer ${
+                  className={`min-h-[36px] shrink-0 rounded-full px-3 text-[13.5px] font-bold transition-colors cursor-pointer ${
                     isActive
-                      ? 'is-selected text-[var(--charcoal)]'
-                      : 'text-[var(--graphite)] hover:text-[var(--charcoal)]'
+                      ? 'bg-[var(--cobalt)] text-white'
+                      : 'bg-[var(--surface-warm)] text-[var(--ink)] hover:bg-[var(--cobalt-tint)]'
                   }`}
                 >
-                  <bdi dir="ltr">{brand}</bdi>
+                  <bdi dir="ltr" className="latin-title">{brand}</bdi>
                 </button>
               );
             })}
@@ -195,15 +205,15 @@ export function ModelSelector({ open, onClose }) {
               ابحث عن موديل موبايلك
             </label>
             <div className="relative flex items-center">
-              <SearchIcon className="pointer-events-none absolute start-3 w-4 h-4 text-[var(--graphite)]" />
+              <SearchIcon className="pointer-events-none absolute start-3.5 h-4 w-4 text-[var(--ink-muted)]" />
               <input
                 ref={searchInputRef}
                 id="model-search-input"
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="دوّر على الموديل..."
-                className="min-h-[44px] w-full rounded-[4px] border border-[rgba(38,40,43,0.18)] bg-[var(--gallery-white)] ps-10 pe-3 text-[15px] text-[var(--charcoal)] placeholder:text-[var(--graphite)]"
+                placeholder="اكتب اسم الموديل... مثلاً S24 أو Note 13"
+                className="min-h-[44px] w-full rounded-[var(--radius-ui)] border-[1.5px] border-[var(--border-subtle)] focus:border-[var(--cobalt)] bg-[var(--paper)] ps-10 pe-3 text-[14.5px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
               />
             </div>
           </div>
@@ -212,10 +222,10 @@ export function ModelSelector({ open, onClose }) {
           <div
             role="listbox"
             aria-label="قائمة الموديلات"
-            className="flex-1 overflow-y-auto px-5 py-2"
+            className="flex-1 overflow-y-auto px-5 py-1.5"
           >
             {visibleModels.length > 0 ? (
-              <ul className="space-y-1.5">
+              <ul className="space-y-1">
                 {visibleModels.map((model) => {
                   const isCurrent = selectedModel?.id === model.id;
                   return (
@@ -225,17 +235,22 @@ export function ModelSelector({ open, onClose }) {
                         role="option"
                         aria-selected={isCurrent}
                         onClick={() => selectPhoneModel(model.id)}
-                        className={`flex min-h-[44px] w-full items-center justify-between rounded-[4px] px-3 text-start transition-colors cursor-pointer ${
+                        className={`flex min-h-[44px] w-full items-center justify-between rounded-[var(--radius-ui)] px-3.5 text-start transition-colors cursor-pointer ${
                           isCurrent
-                            ? 'is-selected font-semibold text-[var(--charcoal)]'
-                            : 'text-[var(--charcoal)] hover:bg-[var(--plaster)]/60'
+                            ? 'bg-[var(--cobalt-tint)] border-[1.5px] border-[var(--cobalt)] font-bold text-[var(--ink)]'
+                            : 'text-[var(--ink)] hover:bg-[var(--surface-warm)]'
                         }`}
                       >
-                        <bdi dir="ltr" className="text-[15px]">
+                        <bdi dir="ltr" className="latin-title text-[15px] font-semibold">
                           {model.name}
                         </bdi>
-                        {query.trim() ? (
-                          <span className="type-caption text-[13px]">
+                        {isCurrent ? (
+                          <span className="inline-flex items-center gap-1 text-[12.5px] font-bold text-[var(--cobalt)]">
+                            <CheckIcon className="h-3.5 w-3.5" />
+                            <span>مختار</span>
+                          </span>
+                        ) : query.trim() ? (
+                          <span className="type-caption text-[12.5px]">
                             <bdi dir="ltr">{model.brand}</bdi>
                           </span>
                         ) : null}
@@ -245,18 +260,18 @@ export function ModelSelector({ open, onClose }) {
                 })}
               </ul>
             ) : (
-              <p className="py-6 text-[15px] text-[var(--graphite)]">
-                مفيش موديل بالاسم ده في القايمة. ابعتهولنا من تحت وهنأكدهولك.
+              <p className="py-6 text-[14.5px] text-[var(--ink-muted)]">
+                ملقيناش الموديل ده في القايمة. ابعتهولنا من الزرار اللي تحت وهنأكدهولك فوراً.
               </p>
             )}
           </div>
 
           {/* Persistent "My phone isn't in the list" option */}
-          <div className="px-5 pt-2 pb-4">
+          <div className="border-t border-[var(--border-subtle)] bg-[var(--paper)]/70 px-5 py-3">
             <button
               type="button"
               onClick={() => setView('missing-form')}
-              className="btn-secondary w-full justify-start text-[15px]"
+              className="btn-secondary w-full justify-start !min-h-[38px] text-[14.5px]"
             >
               موبايلي مش في القايمة
             </button>
@@ -265,15 +280,15 @@ export function ModelSelector({ open, onClose }) {
       ) : null}
 
       {view === 'missing-form' ? (
-        <form onSubmit={handleMissingSubmit} noValidate className="space-y-4 px-5 pt-2 pb-5">
-          <p className="text-[15px] leading-[1.65] text-[var(--graphite)]">
-            اكتب نوع موبايلك ورقمك وهنتأكدلك إن مقاسه متاح عندنا قبل ما تطلب.
+        <form onSubmit={handleMissingSubmit} noValidate className="space-y-4 px-5 pt-4 pb-5">
+          <p className="text-[14.5px] leading-[1.65] text-[var(--ink-muted)]">
+            اكتب نوع موبايلك ورقمك وهنتأكدلك إن قالبه متاح في المطبعة قبل ما تطلب.
           </p>
 
           <div>
             <label
               htmlFor="missing-phone-name"
-              className="mb-1.5 block text-[14px] font-medium text-[var(--charcoal)]"
+              className="mb-1.5 block text-[14px] font-semibold text-[var(--ink)]"
             >
               اسم الموبايل والموديل
             </label>
@@ -286,10 +301,10 @@ export function ModelSelector({ open, onClose }) {
               placeholder="مثلاً: Nothing Phone 2a"
               aria-invalid={Boolean(formErrors.phoneName)}
               aria-describedby={formErrors.phoneName ? 'missing-phone-name-err' : undefined}
-              className="min-h-[46px] w-full rounded-[4px] border border-[rgba(38,40,43,0.18)] bg-[var(--gallery-white)] px-3 text-[15px] text-[var(--charcoal)] placeholder:text-[var(--graphite)]"
+              className="min-h-[46px] w-full rounded-[var(--radius-ui)] border-[1.5px] border-[var(--input-border)] bg-[var(--surface)] px-3.5 text-[15px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
             />
             {formErrors.phoneName ? (
-              <p id="missing-phone-name-err" className="mt-1.5 text-[13px] font-medium text-[var(--klein)]">
+              <p id="missing-phone-name-err" className="mt-1.5 text-[13px] font-semibold text-[var(--brand)]">
                 {formErrors.phoneName}
               </p>
             ) : null}
@@ -298,7 +313,7 @@ export function ModelSelector({ open, onClose }) {
           <div>
             <label
               htmlFor="missing-phone-mobile"
-              className="mb-1.5 block text-[14px] font-medium text-[var(--charcoal)]"
+              className="mb-1.5 block text-[14px] font-semibold text-[var(--ink)]"
             >
               رقم الموبايل
             </label>
@@ -313,32 +328,34 @@ export function ModelSelector({ open, onClose }) {
               placeholder="01012345678"
               aria-invalid={Boolean(formErrors.mobileNumber)}
               aria-describedby={formErrors.mobileNumber ? 'missing-phone-mobile-err' : undefined}
-              className="min-h-[46px] w-full rounded-[4px] border border-[rgba(38,40,43,0.18)] bg-[var(--gallery-white)] px-3 text-start text-[15px] tabular-nums text-[var(--charcoal)] placeholder:text-[var(--graphite)]"
+              className="min-h-[46px] w-full rounded-[var(--radius-ui)] border-[1.5px] border-[var(--input-border)] bg-[var(--surface)] px-3.5 text-start text-[15px] tabular-nums text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
             />
             {formErrors.mobileNumber ? (
-              <p id="missing-phone-mobile-err" className="mt-1.5 text-[13px] font-medium text-[var(--klein)]">
+              <p id="missing-phone-mobile-err" className="mt-1.5 text-[13px] font-semibold text-[var(--brand)]">
                 {formErrors.mobileNumber}
               </p>
             ) : null}
           </div>
 
           <button type="submit" className="btn-primary w-full">
-            ابعت
+            ابعت الطلب
           </button>
         </form>
       ) : null}
 
       {view === 'missing-confirmed' ? (
-        <div className="space-y-4 px-5 pt-2 pb-5">
-          <p className="text-[16px] leading-[1.7] font-medium text-[var(--charcoal)]">
-            خدمة العملاء هتتواصل معاك لتأكيد الموديل
-          </p>
-          {submittedPhoneName ? (
-            <p className="type-caption">
-              الموديل المطلوب: <bdi dir="ltr" className="text-[var(--charcoal)]">{submittedPhoneName}</bdi>
+        <div className="space-y-4 px-5 pt-4 pb-5">
+          <div className="rounded-[var(--radius-ui)] bg-[var(--jade-tint)] border border-[var(--jade)]/30 p-3.5">
+            <p className="text-[15.5px] leading-[1.65] font-bold text-[var(--jade)]">
+              خدمة العملاء هتتواصل معاك لتأكيد الموديل
             </p>
-          ) : null}
-          <p className="text-[14px] leading-[1.6] text-[var(--graphite)]">
+            {submittedPhoneName ? (
+              <p className="mt-1 text-[13.5px] text-[var(--ink)]">
+                الموديل المطلوب: <bdi dir="ltr" className="font-bold">{submittedPhoneName}</bdi>
+              </p>
+            ) : null}
+          </div>
+          <p className="text-[14px] leading-[1.6] text-[var(--ink-muted)]">
             تقدر تتصفح كل التصميمات دلوقتي عادي، وأول ما نأكد الموديل هنجهزلك جرابك.
           </p>
           <button type="button" onClick={onClose} className="btn-primary w-full">
@@ -349,7 +366,6 @@ export function ModelSelector({ open, onClose }) {
     </div>
   );
 
-  // Mobile bottom sheet
   if (isMobileViewport) {
     return (
       <AnimatePresence>
@@ -361,7 +377,7 @@ export function ModelSelector({ open, onClose }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, ease: EASE }}
               onClick={onClose}
-              className="fixed inset-0 bg-[#26282B]/35"
+              className="fixed inset-0 bg-[#14181F]/45"
             />
             <motion.div
               ref={panelRef}
@@ -369,7 +385,7 @@ export function ModelSelector({ open, onClose }) {
               animate={prefersReducedMotion ? { opacity: 1 } : { y: 0 }}
               exit={prefersReducedMotion ? { opacity: 0 } : { y: '100%' }}
               transition={{ duration: 0.24, ease: EASE }}
-              className="fixed inset-x-0 bottom-0 z-50 rounded-t-[4px] bg-[var(--gallery-white)]"
+              className="fixed inset-x-0 bottom-0 z-50 rounded-t-[18px] border-t-2 border-[var(--ink)] bg-[var(--surface)]"
             >
               {panelBody}
             </motion.div>
@@ -379,7 +395,6 @@ export function ModelSelector({ open, onClose }) {
     );
   }
 
-  // Desktop anchored dropdown (physical left / inline-end)
   return (
     <AnimatePresence>
       {open ? (
@@ -390,8 +405,8 @@ export function ModelSelector({ open, onClose }) {
           initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
-          transition={{ duration: 0.22, ease: EASE }}
-          className="absolute end-0 top-[calc(100%+8px)] z-50 w-[408px] rounded-[4px] border border-[rgba(38,40,43,0.16)] bg-[var(--gallery-white)]"
+          transition={{ duration: 0.2, ease: EASE }}
+          className="absolute end-0 top-[calc(100%+10px)] z-50 w-[416px] overflow-hidden rounded-[14px] border-[1.5px] border-[var(--ink)] bg-[var(--surface)] shadow-[-5px_5px_0_#14181F]"
         >
           {panelBody}
         </motion.div>

@@ -1,281 +1,95 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { STORE_CONFIG } from '../../config/store';
 import { useStore } from '../../context/StoreContext';
 import { storeService } from '../../services/storeService';
 import { ModelChip } from '../header/ModelChip';
-import { CheckIcon } from '../icons/Icons';
-import { PhoneCaseMockup } from '../mockup/PhoneCaseMockup';
+import { ForwardArrowRtlIcon } from '../icons/Icons';
+import { ProductCard } from '../product/ProductCard';
 
-const EASE = [0.22, 1, 0.36, 1];
-
-/**
- * Responsive target column density from DESIGN.md:
- * 2 (mobile), 3 (>=768px), 4 (>=1024px), 5 (>=1440px), 6 (>=1920px).
- * Track counts are chosen so every balanced row partitions cleanly into exact integer spans.
- */
-function getGridSpecForWidth(width) {
-  if (width >= 1920) return { cols: 6, tracks: 12 };
-  if (width >= 1440) return { cols: 5, tracks: 20 };
-  if (width >= 1024) return { cols: 4, tracks: 12 };
-  if (width >= 768) return { cols: 3, tracks: 12 };
-  return { cols: 2, tracks: 2 };
+function getColsForWidth(width) {
+  if (width >= 1800) return 6;
+  if (width >= 1360) return 5;
+  if (width >= 1024) return 4;
+  if (width >= 680) return 3;
+  return 2;
 }
 
-function useSalonGridSpec() {
-  const [spec, setSpec] = useState(() =>
-    typeof window === 'undefined'
-      ? { cols: 4, tracks: 12 }
-      : getGridSpecForWidth(window.innerWidth)
+function useResponsiveCols() {
+  const [cols, setCols] = useState(() =>
+    typeof window === 'undefined' ? 4 : getColsForWidth(window.innerWidth)
   );
 
   useEffect(() => {
     const sync = () => {
-      const next = getGridSpecForWidth(window.innerWidth);
-      setSpec((prev) =>
-        prev.cols === next.cols && prev.tracks === next.tracks ? prev : next
-      );
+      const next = getColsForWidth(window.innerWidth);
+      setCols((prev) => (prev === next ? prev : next));
     };
     sync();
     window.addEventListener('resize', sync);
     return () => window.removeEventListener('resize', sync);
   }, []);
 
-  return spec;
+  return cols;
 }
 
 /**
- * Partition N items into balanced row lengths so no desktop row ends with unfilled columns,
- * while hitting full `targetCols` density on leading rows.
- */
-function computeBalancedRowCounts(total, targetCols) {
-  if (total <= 0) return [];
-  if (targetCols <= 2) {
-    const rows = [];
-    for (let rem = total; rem > 0; rem -= 2) {
-      rows.push(Math.min(2, rem));
-    }
-    return rows;
-  }
-  if (total <= targetCols) return [total];
-
-  const numRows = Math.ceil(total / targetCols);
-  const rows = [];
-  let remaining = total;
-  let rowsLeft = numRows;
-
-  while (rowsLeft > 0) {
-    // Prefer full `targetCols` on leading rows whenever the remaining rows still hold >= max(3, targetCols - 2) items each
-    const minTailSize = Math.max(3, targetCols - 2);
-    if (
-      rowsLeft > 1 &&
-      remaining - targetCols >= (rowsLeft - 1) * minTailSize &&
-      remaining - targetCols <= (rowsLeft - 1) * targetCols
-    ) {
-      rows.push(targetCols);
-      remaining -= targetCols;
-      rowsLeft -= 1;
-    } else {
-      const count = Math.ceil(remaining / rowsLeft);
-      rows.push(count);
-      remaining -= count;
-      rowsLeft -= 1;
-    }
-  }
-  return rows;
-}
-
-/**
- * Derive render-time effective grid spans for every item so each row sums strictly to `trackCount`.
- * Uses stored `product.salonSpan` (without mutating data) to assign wider tracks when trackCount % rowLen !== 0.
- */
-function computeEffectiveSpans(items, targetCols, trackCount) {
-  if (items.length === 0) return [];
-  if (targetCols <= 2) {
-    return items.map(() => 1);
-  }
-
-  const rowCounts = computeBalancedRowCounts(items.length, targetCols);
-  const spans = new Array(items.length);
-  let cursor = 0;
-
-  for (const rowLen of rowCounts) {
-    const base = Math.floor(trackCount / rowLen);
-    const rem = trackCount % rowLen;
-    const rowSlice = [];
-    for (let i = 0; i < rowLen; i++) {
-      rowSlice.push({ idx: cursor + i, weight: items[cursor + i]?.salonSpan || 4 });
-    }
-    // Award any remainder tracks to items with higher stored salonSpan
-    const ranked = [...rowSlice].sort((a, b) => b.weight - a.weight || a.idx - b.idx);
-    const boosted = new Set(ranked.slice(0, rem).map((entry) => entry.idx));
-
-    for (const entry of rowSlice) {
-      spans[entry.idx] = boosted.has(entry.idx) ? base + 1 : base;
-    }
-    cursor += rowLen;
-  }
-
-  return spans;
-}
-
-// Subtle salon-hang proportion hierarchy derived from stored `salonSpan` (keeps dead space well below 120px)
-const SALON_WIDTH_CLASSES = {
-  3: 'w-[92%] max-w-[292px]',
-  4: 'w-[96%] max-w-[306px]',
-  5: 'w-full max-w-[320px]',
-};
-
-// Deliberate vertical salon-hang stagger offsets strictly capped at 24px (DESIGN.md)
-const DESKTOP_OFFSET_PX = [0, 18, 6, 22, 10, 14, 24, 4, 16, 8, 20, 0, 12, 6];
-
-function SalonCaseItem({ product, index, effectiveSpan, isMobile, displayModel, onAdd }) {
-  const [justAdded, setJustAdded] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
-
-  const spanWeight = product.salonSpan || 4;
-  const widthClass = isMobile ? 'w-full' : SALON_WIDTH_CLASSES[spanWeight] || SALON_WIDTH_CLASSES[4];
-  const verticalOffsetPx = isMobile
-    ? index % 2 === 1
-      ? 12
-      : 0
-    : DESKTOP_OFFSET_PX[index % DESKTOP_OFFSET_PX.length];
-
-  const handleAdd = () => {
-    onAdd(product);
-    setJustAdded(true);
-    window.setTimeout(() => {
-      setJustAdded(false);
-    }, 1200);
-  };
-
-  return (
-    <motion.article
-      layout={!prefersReducedMotion}
-      initial={prefersReducedMotion ? false : { opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-      transition={{
-        layout: { duration: 0.4, ease: EASE },
-        opacity: { duration: 0.25, ease: EASE },
-      }}
-      style={{
-        gridColumn: `span ${effectiveSpan} / span ${effectiveSpan}`,
-        marginTop: verticalOffsetPx ? `${verticalOffsetPx}px` : undefined,
-      }}
-      className="case-lift-group flex flex-col items-start"
-    >
-      {/* Case sits directly on the plaster wall — NO box, NO border, subtle wall-lift on hover/focus */}
-      <div className={widthClass}>
-        <PhoneCaseMockup
-          model={displayModel}
-          artworkId={product.artworkId}
-          className="w-full"
-          ariaLabel={`جراب ${product.name} لموبايل ${displayModel.name}`}
-        />
-
-        {/* Quiet gallery caption: 10-12px below mockup (DESIGN.md) */}
-        <div className="mt-[var(--image-to-caption)] text-start">
-          <div className="flex items-baseline justify-between gap-x-2 gap-y-1">
-            <h3 className="min-w-0 text-start text-[15px] font-medium leading-[1.35] text-[var(--charcoal)] sm:text-[16px] sm:leading-[1.4]">
-              <bdi dir="ltr">{product.name}</bdi>
-            </h3>
-            <span className="shrink-0 text-[14px] font-semibold tabular-nums text-[var(--charcoal)] sm:text-[15px]">
-              {product.price} {STORE_CONFIG.currencyLabel}
-            </span>
-          </div>
-
-          <div className="mt-0.5">
-            <button
-              type="button"
-              onClick={handleAdd}
-              className="btn-secondary !min-h-[44px] !px-0 !text-[14px] sm:!text-[15px]"
-              aria-live="polite"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {justAdded ? (
-                  <motion.span
-                    key="added"
-                    initial={prefersReducedMotion ? false : { opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={prefersReducedMotion ? undefined : { opacity: 0, y: -4 }}
-                    transition={{ duration: 0.3, ease: EASE }}
-                    className="inline-flex items-center gap-1 font-semibold text-[var(--klein)] no-underline"
-                  >
-                    <CheckIcon className="h-4 w-4" />
-                    <span>اتضاف</span>
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="add"
-                    initial={prefersReducedMotion ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-                    transition={{ duration: 0.2, ease: EASE }}
-                  >
-                    ضيف للسلة
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </button>
-          </div>
-        </div>
-      </div>
-    </motion.article>
-  );
-}
-
-/**
- * Salon hang product grid directly on the plaster wall.
- * Reused on `/` (2 full rows matching viewport columns) and `/categories` (full filtered catalog).
- * Reflows with Motion layout animation (400ms) whenever phone model, category, or search changes.
+ * Dense, responsive product showcase grid for غلاف.
+ * Scales columns up on wide screens (2 -> 3 -> 4 -> 5 -> 6) so wide desktop screens
+ * pack more product editions cleanly without dead horizontal bands.
  */
 export function SalonHangGrid({
   categoryId = null,
   limit = null,
   previewRows = null,
   showViewAllLink = false,
+  showQuickCategories = false,
   ignoreSearch = false,
   headingText = null,
   compactTop = false,
 }) {
   const {
     categories,
+    categoryCounts,
     searchQuery,
     setSearchQuery,
     phoneSelection,
+    selectedModel,
     visualPreviewModel,
     setIsModelSelectorOpen,
     addCatalogProductToCart,
   } = useStore();
 
-  const { cols, tracks } = useSalonGridSpec();
-  const isMobile = cols <= 2;
+  const cols = useResponsiveCols();
+  const [localCategoryId, setLocalCategoryId] = useState(null);
 
+  const effectiveCategoryId = showQuickCategories ? localCategoryId : categoryId;
   const activeSearch = ignoreSearch ? '' : searchQuery;
 
-  const products = useMemo(() => {
-    const allMatching = storeService.getProducts({
+  const categoryNameMap = useMemo(
+    () => Object.fromEntries(categories.map((c) => [c.id, c.nameAr])),
+    [categories]
+  );
+
+  const allMatching = useMemo(() => {
+    return storeService.getProducts({
       modelId: phoneSelection.modelId,
       modelStatus: phoneSelection.status,
-      categoryId,
+      categoryId: effectiveCategoryId,
       searchQuery: activeSearch,
     });
+  }, [phoneSelection.modelId, phoneSelection.status, effectiveCategoryId, activeSearch]);
+
+  const products = useMemo(() => {
     if (previewRows) {
-      // Scale home preview cleanly with viewport column count so every preview row is 100% full
+      // Scale home preview cleanly with viewport column count so rows stay full
       const targetCount = Math.max(6, previewRows * cols);
       return allMatching.slice(0, targetCount);
     }
     return limit ? allMatching.slice(0, limit) : allMatching;
-  }, [phoneSelection.modelId, phoneSelection.status, categoryId, activeSearch, limit, previewRows, cols]);
+  }, [allMatching, limit, previewRows, cols]);
 
-  const effectiveSpans = useMemo(
-    () => computeEffectiveSpans(products, cols, tracks),
-    [products, cols, tracks]
-  );
-
-  const activeCategory = categories.find((c) => c.id === categoryId);
+  const activeCategory = categories.find((c) => c.id === effectiveCategoryId);
 
   const sectionHeading = activeSearch.trim()
     ? `نتايج البحث عن "${activeSearch.trim()}"`
@@ -292,44 +106,98 @@ export function SalonHangGrid({
       }`}
     >
       <div className="page-container">
-        {/* Top bar: section heading + pill phone-model chip grouped cleanly at start (no empty horizontal gulf) */}
-        <div className="mb-[var(--heading-to-content)] flex flex-wrap items-center justify-start gap-x-5 gap-y-3">
-          <div className="flex flex-wrap items-baseline gap-4">
-            <h2 id="designs-heading" className="type-h2 text-[var(--charcoal)]">
+        {/* Header bar: Section title + ModelChip + View-all link */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <h2 id="designs-heading" className="type-h2 text-[var(--ink)]">
               {sectionHeading}
             </h2>
-            {!ignoreSearch && (activeCategory || activeSearch.trim()) ? (
+            <ModelChip />
+            {!ignoreSearch && (categoryId || activeSearch.trim()) ? (
               <Link
                 to="/categories"
                 onClick={() => setSearchQuery('')}
-                className="btn-secondary !text-[15px] text-[var(--graphite)]"
+                className="btn-secondary !min-h-[36px] !text-[14px] text-[var(--ink-muted)]"
               >
                 عرض الكل
               </Link>
             ) : null}
           </div>
 
-          <ModelChip />
+          {showViewAllLink ? (
+            <Link
+              to="/categories"
+              className="hidden sm:inline-flex items-center gap-1.5 text-[14.5px] font-bold text-[var(--ink)] hover:text-[var(--brand)] transition-colors"
+            >
+              <span>الكتالوج كامل ({categoryCounts.all ?? 14})</span>
+              <ForwardArrowRtlIcon className="h-4 w-4" />
+            </Link>
+          ) : null}
         </div>
 
-        {/* Salon hang grid or friendly actionable empty state */}
+        {/* Optional inline quick-category filter strip on the Home Page */}
+        {showQuickCategories ? (
+          <div
+            role="tablist"
+            aria-label="فلترة سريعة حسب القسم"
+            className="no-scrollbar mb-[var(--heading-to-content)] flex items-center gap-2 overflow-x-auto pb-1"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={localCategoryId === null}
+              onClick={() => setLocalCategoryId(null)}
+              className={`inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[13.5px] font-bold transition-colors cursor-pointer ${
+                localCategoryId === null
+                  ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]'
+                  : 'border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--surface-warm)]'
+              }`}
+            >
+              <span>الكل</span>
+              <span className="text-[12px] opacity-75 tabular-nums">{categoryCounts.all ?? 0}</span>
+            </button>
+
+            {categories.map((cat) => {
+              const isSelected = localCategoryId === cat.id;
+              const count = categoryCounts[cat.id] ?? 0;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => setLocalCategoryId(cat.id)}
+                  className={`inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[13.5px] font-bold transition-colors cursor-pointer ${
+                    isSelected
+                      ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]'
+                      : 'border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--surface-warm)]'
+                  }`}
+                >
+                  <span>{cat.nameAr}</span>
+                  <span className="text-[12px] opacity-70 tabular-nums">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+
+        {/* Product Grid or Actionable Empty State */}
         {products.length > 0 ? (
           <>
             <div
-              className="grid grid-flow-dense items-start gap-x-[var(--grid-col-gap)] gap-y-[var(--grid-row-gap)]"
+              className="grid gap-x-[var(--grid-col-gap)] gap-y-[var(--grid-row-gap)]"
               style={{
-                gridTemplateColumns: `repeat(${tracks}, minmax(0, 1fr))`,
+                gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
               }}
             >
               <AnimatePresence mode="popLayout">
-                {products.map((product, index) => (
-                  <SalonCaseItem
+                {products.map((product) => (
+                  <ProductCard
                     key={product.id}
                     product={product}
-                    index={index}
-                    effectiveSpan={effectiveSpans[index] || 1}
-                    isMobile={isMobile}
+                    categoryNameAr={categoryNameMap[product.categoryId] || ''}
                     displayModel={visualPreviewModel}
+                    selectedModel={selectedModel}
                     onAdd={addCatalogProductToCart}
                   />
                 ))}
@@ -337,21 +205,25 @@ export function SalonHangGrid({
             </div>
 
             {showViewAllLink ? (
-              <div className="mt-[var(--heading-to-content)] text-start">
-                <Link to="/categories" className="btn-secondary text-[17px]">
-                  شوف كل الجرابات
+              <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border-subtle)] pt-5">
+                <p className="type-caption text-[14px]">
+                  كل التصميمات بتتطبع مطفي ضد البصمات وبمقاس فتحة كاميرا موبايلك بالملّي.
+                </p>
+                <Link to="/categories" className="btn-outline !min-h-[44px]">
+                  <span>شوف كل الجرابات ({categoryCounts.all ?? 14})</span>
+                  <ForwardArrowRtlIcon className="h-4 w-4" />
                 </Link>
               </div>
             ) : null}
           </>
         ) : (
-          <div className="py-8 text-start">
-            <p className="type-h3 max-w-[60ch] text-[var(--charcoal)]">
+          <div className="rounded-[var(--radius-stage)] border border-[var(--border-subtle)] bg-[var(--surface)] p-6 sm:p-8 text-start">
+            <p className="type-h3 max-w-[60ch] text-[var(--ink)]">
               {activeSearch.trim()
                 ? 'مفيش تصميمات بالاسم ده دلوقتي. جرّب كلمة تانية أو ارفع تصميمك.'
                 : 'مفيش تصميمات للموديل ده لسه. جرّب موبايل تاني أو ارفع تصميمك.'}
             </p>
-            <div className="mt-5 flex flex-wrap items-center gap-6">
+            <div className="mt-5 flex flex-wrap items-center gap-4">
               {activeSearch.trim() ? (
                 <button
                   type="button"
@@ -359,6 +231,14 @@ export function SalonHangGrid({
                   className="btn-primary"
                 >
                   امسح البحث
+                </button>
+              ) : localCategoryId ? (
+                <button
+                  type="button"
+                  onClick={() => setLocalCategoryId(null)}
+                  className="btn-primary"
+                >
+                  اعرض كل الأقسام
                 </button>
               ) : (
                 <button
@@ -369,8 +249,8 @@ export function SalonHangGrid({
                   اختار موبايل تاني
                 </button>
               )}
-              <Link to="/customize" className="btn-secondary">
-                ارفع تصميمك
+              <Link to="/customize" className="btn-outline">
+                ارفع تصميمك المخصوص
               </Link>
             </div>
           </div>

@@ -12,6 +12,7 @@ const EASE = [0.22, 1, 0.36, 1];
 function getRouteGroup(pathname) {
   if (pathname === '/') return 'home';
   if (pathname === '/categories' || pathname.startsWith('/categories/')) return 'categories';
+  if (pathname.startsWith('/products/')) return `product:${pathname}`;
   if (pathname === '/customize') return 'customize';
   if (pathname === '/how-it-works') return 'how-it-works';
   if (pathname === '/checkout') return 'checkout';
@@ -20,22 +21,26 @@ function getRouteGroup(pathname) {
 
 function getDocumentTitle(pathname) {
   const brand = STORE_CONFIG.name;
-  if (pathname === '/') return `${brand} — جرابات مطبوعة على مزاجك`;
+  if (pathname === '/') return `${brand} — جرابات مطبوعة على مقاس موبايلك`;
   if (pathname === '/categories') return `الأقسام — ${brand}`;
   if (pathname.startsWith('/categories/')) {
     const slug = pathname.slice('/categories/'.length);
     const category = storeService.getCategories().find((c) => c.slug === slug);
-    return category ? `${category.nameAr} — ${brand}` : `الأقسام — ${brand}`;
+    return category ? `جرابات ${category.nameAr} — ${brand}` : `الأقسام — ${brand}`;
+  }
+  if (pathname.startsWith('/products/')) {
+    const slug = pathname.slice('/products/'.length);
+    const product = storeService.getProductBySlug(slug);
+    return product ? `جراب ${product.name} — ${brand}` : `تفاصيل الجراب — ${brand}`;
   }
   if (pathname === '/customize') return `صمّم جرابك بنفسك — ${brand}`;
-  if (pathname === '/how-it-works') return `إزاي تطلب — ${brand}`;
+  if (pathname === '/how-it-works') return `إزاي تطلب والشحن — ${brand}`;
   if (pathname === '/checkout') return `تأكيد الطلب — ${brand}`;
   return `الصفحة مش موجودة — ${brand}`;
 }
 
 /**
  * Shared application shell holding Header, routed page content, Footer, and CartDrawer.
- * Handles per-page document.title, scroll-to-top, and accessible H1 focus on navigation.
  */
 export function MainLayout() {
   const { pathname } = useLocation();
@@ -57,8 +62,6 @@ export function MainLayout() {
     const groupChanged = prevGroupRef.current !== routeGroup;
     prevGroupRef.current = routeGroup;
 
-    // On switching between top-level pages, jump to top and move focus to the new page <h1>.
-    // Within /categories <-> /categories/:slug, keep smooth in-place layout reflow.
     if (groupChanged) {
       window.scrollTo({ top: 0, behavior: 'auto' });
       requestAnimationFrame(() => {
@@ -71,7 +74,7 @@ export function MainLayout() {
   }, [pathname, routeGroup]);
 
   return (
-    <div className="flex flex-col bg-[var(--plaster)] text-[var(--charcoal)]">
+    <div className="flex min-h-dvh flex-col bg-[var(--paper)] text-[var(--ink)]">
       <Header />
       <motion.main
         key={routeGroup}
