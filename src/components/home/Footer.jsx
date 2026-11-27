@@ -2,28 +2,44 @@ import { Link } from 'react-router-dom';
 import { STORE_CONFIG } from '../../config/store';
 import { useStore } from '../../context/StoreContext';
 import { BrandLogo } from '../brand/BrandLogo';
-import { CashCodIcon } from '../icons/Icons';
+import { SocialLinks } from '../common/SocialLinks';
+import { ClockIcon, EyeIcon, ExchangeIcon, ForwardArrowRtlIcon } from '../icons/Icons';
+
+const STORE_LINKS = [
+  { to: '/', label: 'الرئيسية' },
+  { to: '/categories', label: 'كل الجرابات' },
+  { to: '/customize', label: 'صمم جرابك' },
+  { to: '/how-it-works', label: 'إزاي تطلب والشحن' },
+];
+
+const POLICY_HIGHLIGHTS = [
+  { Icon: ExchangeIcon, text: 'استبدال ببلاش لو فيه مشكلة في الطباعة أو الموديل مختلف' },
+  { Icon: ClockIcon, text: `تنفيذ الطلب خلال ${STORE_CONFIG.maxProductionDays} أيام كحد أقصى` },
+  { Icon: EyeIcon, text: 'عاين جرابك عند الاستلام قبل ما تدفع' },
+];
+
+const linkClass =
+  'inline-flex min-h-[44px] items-center text-[15px] text-white/80 transition-colors hover:text-white lg:min-h-[36px]';
 
 /**
- * Footer anchored in `--brand-black` (`#010000`) so the official غلاف logo sits
- * with full contrast and harmony alongside the `#FECE05` & `#D40C14` top accent rule.
+ * Brand-black footer: logo + socials, store links, and a policy card that leads to
+ * the Terms & Conditions page. Shares the Crimson + Gold rule used by the mobile drawer.
  */
 export function Footer() {
-  const { categories, setIsModelSelectorOpen } = useStore();
+  const { setIsModelSelectorOpen } = useStore();
   const year = new Date().getFullYear();
 
   return (
     <footer className="mt-[var(--section-pad-y)] bg-[var(--brand-black)] text-white">
-      {/* Top accent bar echoing the official logo's Crimson + Gold colors */}
       <div className="flex h-1 w-full" aria-hidden="true">
         <span className="w-2/3 bg-[var(--brand)]" />
         <span className="w-1/3 bg-[var(--brand-yellow)]" />
       </div>
 
-      <div className="page-container py-10 sm:py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-12 md:gap-x-[var(--grid-col-gap)]">
-          {/* Official Brand Logo & config-driven support note (cols 1-5) */}
-          <div className="text-start md:col-span-5">
+      <div className="page-container pt-10 pb-6 sm:pt-12 lg:pt-14">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-x-[var(--grid-col-gap)]">
+          {/* Brand + socials */}
+          <div className="text-start lg:col-span-4">
             <Link
               to="/"
               aria-label={`${STORE_CONFIG.name} — الصفحة الرئيسية`}
@@ -32,49 +48,33 @@ export function Footer() {
               <BrandLogo size="lg" />
             </Link>
 
-            <p className="mt-3 max-w-[38ch] text-[15px] leading-[1.7] text-white/80">
+            <p className="mt-4 max-w-[36ch] text-[15px] leading-[1.75] text-white/75">
               {STORE_CONFIG.taglineAr}. كل جراب بيتطبع مخصوص على قالب موبايلك وفتحة كاميرته.
             </p>
 
-            <div className="mt-4 inline-flex flex-wrap items-center gap-2 rounded-[var(--radius-ui)] border border-white/15 bg-white/5 px-3.5 py-2 text-[13px] text-white/85">
-              <CashCodIcon className="h-4 w-4 text-[var(--brand-yellow)]" />
-              <span>{STORE_CONFIG.contact.supportNoteAr}</span>
-              <span className="text-white/35" aria-hidden="true">·</span>
-              <span className="text-white/70">{STORE_CONFIG.contact.hoursAr}</span>
-            </div>
+            <p className="mt-6 text-[13px] font-bold text-[var(--brand-yellow)]">تابعنا</p>
+            <SocialLinks tone="dark" className="mt-2.5" />
           </div>
 
-          {/* Store navigation (cols 6-8) */}
-          <nav aria-label="روابط المتجر" className="text-start md:col-span-3">
-            <h2 className="font-[var(--font-display)] text-[16px] font-bold text-[var(--brand-yellow)]">
+          {/* Store links */}
+          <nav aria-label="روابط المتجر" className="text-start lg:col-span-3 lg:ps-6">
+            <h2 className="font-[family-name:var(--font-display)] text-[16px] font-bold text-[var(--brand-yellow)]">
               المتجر
             </h2>
-            <ul className="mt-3 space-y-2 text-[14.5px]">
-              <li>
-                <Link to="/" className="text-white/80 hover:text-white transition-colors">
-                  الرئيسية
-                </Link>
-              </li>
-              <li>
-                <Link to="/categories" className="text-white/80 hover:text-white transition-colors">
-                  كل الجرابات
-                </Link>
-              </li>
-              <li>
-                <Link to="/customize" className="text-white/80 hover:text-white transition-colors">
-                  صمم جرابك
-                </Link>
-              </li>
-              <li>
-                <Link to="/how-it-works" className="text-white/80 hover:text-white transition-colors">
-                  إزاي تطلب والشحن
-                </Link>
-              </li>
+            <ul className="mt-2 grid grid-cols-2 gap-x-4 lg:mt-3 lg:grid-cols-1 lg:gap-y-1">
+              {STORE_LINKS.map((item) => (
+                <li key={item.to}>
+                  <Link to={item.to} className={linkClass}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
               <li>
                 <button
                   type="button"
+                  data-model-selector-trigger="true"
                   onClick={() => setIsModelSelectorOpen(true)}
-                  className="text-white/80 hover:text-[var(--brand-yellow)] transition-colors cursor-pointer"
+                  className={`${linkClass} cursor-pointer text-start hover:!text-[var(--brand-yellow)]`}
                 >
                   اختار موديل موبايلك
                 </button>
@@ -82,33 +82,46 @@ export function Footer() {
             </ul>
           </nav>
 
-          {/* Categories navigation (cols 9-12) */}
-          <nav aria-label="أقسام التصميمات" className="text-start md:col-span-4">
-            <h2 className="font-[var(--font-display)] text-[16px] font-bold text-[var(--brand-yellow)]">
-              الأقسام
-            </h2>
-            <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-[14.5px]">
-              {categories.map((cat) => (
-                <li key={cat.id}>
-                  <Link
-                    to={`/categories/${cat.slug}`}
-                    className="text-white/80 hover:text-white transition-colors"
-                  >
-                    {cat.nameAr}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          {/* Policy card -> Terms page */}
+          <div className="text-start lg:col-span-5">
+            <div className="rounded-[var(--radius-stage)] border border-white/12 bg-white/[0.04] p-5 sm:p-6">
+              <h2 className="font-[family-name:var(--font-display)] text-[16px] font-bold text-white">
+                قبل ما تطلب، اعرف حقك
+              </h2>
+              <ul className="mt-4 space-y-3">
+                {POLICY_HIGHLIGHTS.map(({ Icon, text }) => (
+                  <li key={text} className="flex items-start gap-3 text-[14.5px] leading-[1.6] text-white/85">
+                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-ui)] bg-[var(--brand-yellow)] text-[var(--ink)]">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span>{text}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/12 pt-4">
+                <Link
+                  to="/terms"
+                  className="inline-flex min-h-[44px] items-center gap-2 text-[15px] font-bold text-[var(--brand-yellow)] underline decoration-[1.5px] underline-offset-[6px] hover:text-white"
+                >
+                  <span>اقرا الشروط والأحكام</span>
+                  <ForwardArrowRtlIcon className="h-4 w-4" />
+                </Link>
+                <span className="text-[13px] text-white/60">
+                  خدمة العملاء {STORE_CONFIG.contact.hoursAr}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="mt-9 flex flex-col items-start justify-between gap-3 border-t border-white/12 pt-5 text-[13px] text-white/65 sm:flex-row sm:items-center">
-          <p>
-            {STORE_CONFIG.paymentLabelAr} متاح في جميع محافظات مصر · طباعة مطفية عالية الدقة
-          </p>
+        <div className="mt-10 flex flex-col-reverse items-start justify-between gap-3 border-t border-white/12 pt-5 text-[13px] text-white/60 sm:flex-row sm:items-center">
           <p className="tabular-nums">
             © {year} {STORE_CONFIG.name} — جميع الحقوق محفوظة
           </p>
+          <Link to="/terms" className="inline-flex min-h-[36px] items-center text-white/70 hover:text-white">
+            الشروط والأحكام
+          </Link>
         </div>
       </div>
     </footer>
