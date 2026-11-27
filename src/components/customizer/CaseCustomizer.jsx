@@ -258,7 +258,7 @@ export function CaseCustomizer({
 
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-x-[var(--grid-col-gap)]">
           {/* START PANE: Live case preview on unified `.product-stage` */}
-          <div className="sticky top-[var(--header-offset)] z-20 -mx-[var(--page-margin)] bg-[var(--paper)] px-[var(--page-margin)] py-2.5 lg:col-span-4 lg:mx-0 lg:bg-transparent lg:px-0 lg:py-0">
+          <div className="sticky top-[var(--header-offset)] max-[1023px]:[@media(max-height:500px)]:static z-20 -mx-[var(--page-margin)] bg-[var(--paper)] px-[var(--page-margin)] py-2.5 lg:col-span-4 lg:mx-0 lg:bg-transparent lg:px-0 lg:py-0">
             <div className="product-stage flex flex-col items-center p-4 sm:p-6">
               <div
                 className={`w-[128px] transition-transform duration-150 sm:w-[168px] lg:w-full lg:max-w-[260px] ${

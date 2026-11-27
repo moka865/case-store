@@ -362,8 +362,11 @@ export function ProductDetailPage() {
         ) : null}
       </div>
 
-      {/* Mobile Sticky Add-to-Cart Bar */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--border-strong)] bg-[var(--surface)] px-4 py-3 sm:hidden">
+      {/* Mobile Sticky Add-to-Cart Bar — docked cleanly above MobileBottomNav and hidden during keyboard entry */}
+      <div
+        style={{ bottom: 'var(--mobile-bottom-nav-h)' }}
+        className="surface-light-panel fixed inset-x-0 z-20 border-t border-[var(--border-strong)] bg-[var(--surface)] px-4 py-2.5 sm:hidden [@media(max-height:500px)]:hidden [[data-keyboard-open=true]_&]:hidden"
+      >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[17px] font-extrabold tabular-nums text-[var(--ink)]">

@@ -21,6 +21,9 @@ const HowItWorksPage = lazy(() =>
 const CheckoutPage = lazy(() =>
   import('./pages/CheckoutPage').then((m) => ({ default: m.CheckoutPage }))
 );
+const TermsPage = lazy(() =>
+  import('./pages/TermsPage').then((m) => ({ default: m.TermsPage }))
+);
 const NotFoundPage = lazy(() =>
   import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))
 );
@@ -87,6 +90,14 @@ export default function App() {
                 element={
                   <Suspense fallback={<RouteLoadingFallback />}>
                     <CheckoutPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/terms"
+                element={
+                  <Suspense fallback={<RouteLoadingFallback />}>
+                    <TermsPage />
                   </Suspense>
                 }
               />

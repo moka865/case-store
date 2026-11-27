@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { STORE_CONFIG } from '../../config/store';
 import { useStore } from '../../context/StoreContext';
+import { useOverlayDialog } from '../../hooks/useMobileViewportState';
 import { storeService } from '../../services/storeService';
 import { computeItemPricing } from '../../utils/pricing';
 import {
@@ -381,6 +382,15 @@ export function CartDrawer() {
   } = useStore();
 
   const prefersReducedMotion = useReducedMotion();
+  const drawerRef = useRef(null);
+  const closeBtnRef = useRef(null);
+
+  useOverlayDialog({
+    open: isCartOpen,
+    onClose: () => setIsCartOpen(false),
+    containerRef: drawerRef,
+    initialFocusRef: closeBtnRef,
+  });
 
   return (
     <AnimatePresence>
@@ -395,28 +405,35 @@ export function CartDrawer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.22, ease: EASE }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.22, ease: EASE }}
             onClick={() => setIsCartOpen(false)}
             className="fixed inset-0 bg-[#111317]/45"
           />
 
           <motion.aside
-            initial={prefersReducedMotion ? { opacity: 0 } : { x: '-100%' }}
-            animate={prefersReducedMotion ? { opacity: 1 } : { x: 0 }}
+            ref={drawerRef}
+            initial={prefersReducedMotion ? false : { x: '-100%' }}
+            animate={{ x: 0, opacity: 1 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { x: '-100%' }}
-            transition={{ duration: 0.25, ease: EASE }}
-            className="fixed inset-y-0 end-0 z-50 flex w-full max-w-[448px] flex-col bg-[var(--surface)] text-start"
+            transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: EASE }}
+            style={{
+              paddingTop: 'env(safe-area-inset-top, 0px)',
+              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+              paddingInlineEnd: 'env(safe-area-inset-left, 0px)',
+            }}
+            className="surface-light-panel fixed inset-y-0 end-0 z-50 flex h-dvh w-full max-w-[448px] flex-col bg-[var(--surface)] text-start"
           >
-            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 pt-4 pb-3.5">
+            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 pt-4 pb-3.5 [@media(max-height:500px)]:py-2.5">
               <div className="flex items-baseline gap-2.5">
                 <h2 className="type-h3 text-[var(--ink)]">السلة</h2>
                 <span className="type-caption tabular-nums">({cartCount})</span>
               </div>
               <button
+                ref={closeBtnRef}
                 type="button"
                 onClick={() => setIsCartOpen(false)}
                 aria-label="إغلاق السلة"
-                className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-ui)] text-[var(--ink-muted)] hover:bg-[var(--card-bg)] hover:text-[var(--ink)] cursor-pointer"
+                className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-ui)] text-[var(--ink-muted)] hover:bg-[var(--card-bg)] hover:text-[var(--ink)] cursor-pointer"
               >
                 <CloseIcon className="h-5 w-5" />
               </button>

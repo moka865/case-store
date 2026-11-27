@@ -15,12 +15,12 @@ export function FirstVisitPopover({ open, onChooseNow, onDismiss }) {
         <motion.div
           role="status"
           aria-live="polite"
-          initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-          transition={{ duration: 0.22, ease: EASE }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.22, ease: EASE }}
           style={{ boxShadow: 'var(--shadow-panel)' }}
-          className="absolute end-0 top-[calc(100%+10px)] z-40 w-[268px] max-w-[calc(100vw-32px)] rounded-[var(--radius-stage)] border border-[var(--border-strong)] bg-[var(--surface)] p-3.5 text-start text-[var(--ink)]"
+          className="surface-light-panel absolute end-0 top-[calc(100%+10px)] z-40 w-[268px] max-w-[calc(100vw-32px)] rounded-[var(--radius-stage)] border border-[var(--border-strong)] bg-[var(--surface)] p-3.5 text-start text-[var(--ink)]"
         >
           <div className="flex items-start justify-between gap-2">
             <p className="text-[13.5px] leading-[1.55] font-semibold text-[var(--ink)]">
