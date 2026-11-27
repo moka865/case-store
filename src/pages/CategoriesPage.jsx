@@ -47,7 +47,7 @@ export function CategoriesPage() {
       <div className="page-container">
         <PageHeading
           title="الأقسام"
-          description="اختار الجو اللي يناسب ذوقك، وكل قسم بيتحدّث تلقائي لموبايلك."
+          description="اختار الجو اللي يناسب ذوقك، وكل قسم بيتحدث تلقائي لموبايلك."
         />
       </div>
 

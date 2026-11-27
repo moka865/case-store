@@ -17,7 +17,7 @@ import { ModelSelector } from './ModelSelector';
 const PRIMARY_NAV_ITEMS = [
   { to: '/', label: 'الرئيسية', end: true },
   { to: '/categories', label: 'الأقسام', end: false },
-  { to: '/customize', label: 'صمّم جرابك', end: true },
+  { to: '/customize', label: 'صمم جرابك', end: true },
   { to: '/how-it-works', label: 'إزاي تطلب', end: true },
 ];
 
@@ -246,7 +246,7 @@ export function Header() {
                   type="search"
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  placeholder="دوّر باسم التصميم أو القسم... مثلاً أنمي، كورة، Zamalek"
+                  placeholder="دور باسم التصميم أو القسم... مثلا أنمي، كورة، Zamalek"
                   className="min-h-[44px] w-full rounded-[var(--radius-ui)] border border-[var(--border-strong)] bg-[var(--paper)] ps-10 pe-3.5 text-[14.5px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
                 />
               </div>

@@ -10,7 +10,7 @@ export function CustomizePage() {
     <div className="page-band-top">
       <div className="page-container">
         <PageHeading
-          title="صمّم جرابك بنفسك"
+          title="صمم جرابك بنفسك"
           description="ارفع صورتك واكتب اسمك لو حابب. فريق التصميم عندنا بيظبط القص ومكان الكاميرا قبل الطباعة."
         />
       </div>

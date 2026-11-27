@@ -104,7 +104,7 @@ function CartLineItem({
 
   const handleRemoveName = () => {
     if (isTextOnlyCustom) {
-      setNameError('الجراب ده عبارة عن اسم مطبوع بس — عدّل الاسم أو شيل القطعة من السلة.');
+      setNameError('الجراب ده عبارة عن اسم مطبوع بس — عدل الاسم أو شيل القطعة من السلة.');
       return;
     }
     onUpdateSpec(item.cartItemId, {
@@ -205,7 +205,7 @@ function CartLineItem({
               onClick={openPhoneEditor}
               className="font-bold text-[var(--brand)] underline underline-offset-4 cursor-pointer"
             >
-              {editingMode === 'phone' ? 'إلغاء' : 'غيّر الموبايل'}
+              {editingMode === 'phone' ? 'إلغاء' : 'غير الموبايل'}
             </button>
           </div>
 
@@ -228,7 +228,7 @@ function CartLineItem({
                     onClick={openNameEditor}
                     className="font-bold text-[var(--ink)] underline underline-offset-4 hover:text-[var(--brand)] cursor-pointer"
                   >
-                    {editingMode === 'name' ? 'إلغاء' : 'عدّل الاسم'}
+                    {editingMode === 'name' ? 'إلغاء' : 'عدل الاسم'}
                   </button>
                   {!isTextOnlyCustom ? (
                     <button
@@ -270,7 +270,7 @@ function CartLineItem({
               </span>
               <button
                 type="button"
-                aria-label="زوّد الكمية"
+                aria-label="زود الكمية"
                 onClick={() => onUpdateQuantity(item.cartItemId, 1)}
                 className="flex h-8 w-8 items-center justify-center rounded-[6px] text-[15px] font-bold text-[var(--ink)] hover:bg-[var(--card-bg)] cursor-pointer"
               >
@@ -426,7 +426,7 @@ export function CartDrawer() {
               {cartItems.length === 0 ? (
                 <div className="py-10 text-start">
                   <p className="type-body max-w-[60ch] text-[var(--ink)]">
-                    سلتك فاضية دلوقتي. اختار تصميم من الجرابات أو ارفع صورتك وصمّم جرابك.
+                    سلتك فاضية دلوقتي. اختار تصميم من الجرابات أو ارفع صورتك وصمم جرابك.
                   </p>
                   <div className="mt-6 flex flex-wrap gap-3.5">
                     <Link
@@ -441,7 +441,7 @@ export function CartDrawer() {
                       onClick={() => setIsCartOpen(false)}
                       className="btn-outline"
                     >
-                      صمّم جرابك
+                      صمم جرابك
                     </Link>
                   </div>
                 </div>

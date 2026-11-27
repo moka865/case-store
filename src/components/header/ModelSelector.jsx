@@ -95,7 +95,7 @@ export function ModelSelector({ open, onClose }) {
           </h2>
           {view === 'list' ? (
             <p className="text-[12.5px] text-[var(--ink-muted)]">
-              فلتر التصميمات لموبايلك، وتقدر تغيّر الموديل لكل جراب لوحده وقت الطلب
+              فلتر التصميمات لموبايلك، وتقدر تغير الموديل لكل جراب لوحده وقت الطلب
             </p>
           ) : null}
         </div>
@@ -153,7 +153,7 @@ export function ModelSelector({ open, onClose }) {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="اكتب اسم الموديل... مثلاً S24 أو Note 13"
+                placeholder="اكتب اسم الموديل... مثلا S24 أو Note 13"
                 className="min-h-[44px] w-full rounded-[var(--radius-ui)] border border-[var(--border-strong)] bg-[var(--paper)] ps-10 pe-3 text-[14.5px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
               />
             </div>
@@ -201,7 +201,7 @@ export function ModelSelector({ open, onClose }) {
               </ul>
             ) : (
               <p className="py-6 text-[14.5px] text-[var(--ink-muted)]">
-                ملقيناش الموديل ده في القايمة. ابعتهولنا من الزرار اللي تحت وهنأكدهولك فوراً.
+                ملقيناش الموديل ده في القايمة. ابعتهولنا من الزرار اللي تحت وهنأكدهولك فورا.
               </p>
             )}
           </div>

@@ -220,7 +220,7 @@ export function CheckoutPage() {
       });
 
       if (!res.ok) {
-        setSubmitError(res.error || 'حصل مشكلة أثناء حفظ الطلب. جرّب تاني.');
+        setSubmitError(res.error || 'حصل مشكلة أثناء حفظ الطلب. جرب تاني.');
         return;
       }
 
@@ -360,7 +360,7 @@ export function CheckoutPage() {
                   onClick={handleDemoExportOrder}
                   className="btn-secondary text-[var(--ink-muted)]"
                 >
-                  نزّل ملف الطلب (JSON)
+                  نزل ملف الطلب (JSON)
                 </button>
               ) : null}
             </div>
@@ -383,14 +383,14 @@ export function CheckoutPage() {
         <div className="page-container">
           <PageHeading
             title="سلتك فاضية دلوقتي"
-            description="اختار تصميم من الجرابات أو ارفع صورتك وصمّم جرابك الأول عشان تكمل الطلب."
+            description="اختار تصميم من الجرابات أو ارفع صورتك وصمم جرابك الأول عشان تكمل الطلب."
           />
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <Link to="/categories" className="btn-primary">
               شوف الجرابات
             </Link>
             <Link to="/customize" className="btn-outline">
-              صمّم جرابك
+              صمم جرابك
             </Link>
           </div>
         </div>
@@ -505,7 +505,7 @@ export function CheckoutPage() {
                     setFullName(e.target.value);
                     setErrors((p) => ({ ...p, fullName: undefined }));
                   }}
-                  placeholder="مثلاً: أحمد سامي محمود"
+                  placeholder="مثلا: أحمد سامي محمود"
                   aria-invalid={Boolean(errors.fullName)}
                   className="min-h-[48px] w-full rounded-[var(--radius-ui)] border border-[var(--border-strong)] bg-[var(--paper)] px-3.5 text-[15px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
                 />
@@ -568,13 +568,13 @@ export function CheckoutPage() {
                   <option key={gov.id} value={gov.id} disabled={!gov.codAvailable}>
                     {gov.codAvailable
                       ? `${gov.nameAr} — شحن ${gov.shippingFee} ${STORE_CONFIG.currencyLabel} (${gov.estimatedDays} أيام)`
-                      : `${gov.nameAr} — الدفع عند الاستلام غير متاح حالياً`}
+                      : `${gov.nameAr} — الدفع عند الاستلام غير متاح حاليا`}
                   </option>
                 ))}
               </select>
               {unavailableGovs.length > 0 ? (
                 <p className="type-caption mt-1.5 text-[12.5px]">
-                  الدفع المتاح حالياً هو الدفع عند الاستلام فقط، والمحافظات غير المتاحة مقفولة مؤقتاً.
+                  الدفع المتاح حاليا هو الدفع عند الاستلام فقط، والمحافظات غير المتاحة مقفولة مؤقتا.
                 </p>
               ) : null}
               {errors.governorateId ? (
@@ -622,7 +622,7 @@ export function CheckoutPage() {
                 type="text"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="مثلاً: كلمني قبل ما توصل بنص ساعة"
+                placeholder="مثلا: كلمني قبل ما توصل بنص ساعة"
                 className="min-h-[48px] w-full rounded-[var(--radius-ui)] border border-[var(--border-strong)] bg-[var(--paper)] px-3.5 text-[15px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
               />
             </div>
@@ -641,7 +641,7 @@ export function CheckoutPage() {
               >
                 {isSubmitting
                   ? 'بنجهز طلبك...'
-                  : `أكّد الطلب — ${orderTotal} ${STORE_CONFIG.currencyLabel}`}
+                  : `أكد الطلب — ${orderTotal} ${STORE_CONFIG.currencyLabel}`}
               </button>
               <p className="type-caption mt-2.5 text-center text-[12.5px]">
                 {STORE_CONFIG.paymentLabelAr} — التوصيل خلال {totalEstimatedDays} أيام عمل
@@ -709,7 +709,7 @@ export function CheckoutPage() {
             >
               {isSubmitting
                 ? 'بنجهز طلبك...'
-                : `أكّد الطلب — ${orderTotal} ${STORE_CONFIG.currencyLabel}`}
+                : `أكد الطلب — ${orderTotal} ${STORE_CONFIG.currencyLabel}`}
             </button>
           </aside>
         </div>
