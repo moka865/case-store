@@ -9,27 +9,20 @@ import { Link } from 'react-router-dom';
 import { STORE_CONFIG } from '../../config/store';
 import { useStore } from '../../context/StoreContext';
 import { CashCodIcon, ForwardArrowRtlIcon, PhoneHardwareIcon } from '../icons/Icons';
-import { CaseArtwork } from '../mockup/CaseArtworks';
-import { PhoneCaseMockup } from '../mockup/PhoneCaseMockup';
-import { getProductStageTheme } from '../mockup/productPresentation';
 
 const EASE = [0.22, 1, 0.36, 1];
-const CROSSFADE_INTERVAL_MS = 4200;
+const CROSSFADE_INTERVAL_MS = 4000;
 
 /**
- * Signature Cairo Print-Press Hero:
- * - Asymmetric 12-col composition sized so the catalog heading & filter ribbon sit above the 1440x900 fold
- * - Uses real `heroProducts` rendered inside `PhoneCaseMockup` so hardware & camera cutouts adapt live
- *   to the shopper's selected phone model with zero megabytes of raster bloat
- * - One signature motion moment: 3D entrance settle + pointer tilt (±5°) + smooth print cross-fade
+ * Hero section — restores the original `heroCases` PNG cutouts (`Persian Stallions`,
+ * `Morning Shift Edition`, `Starry Night`) on the unified fixed `--card-bg` stage,
+ * paired with clean, modern `Cairo` display headlines and clear brand CTAs.
  */
 export function HeroSection() {
   const {
-    heroProducts,
+    heroCases,
     allPhoneModels,
     selectedModel,
-    visualPreviewModel,
-    phoneSelection,
     setIsModelSelectorOpen,
   } = useStore();
   const prefersReducedMotion = useReducedMotion();
@@ -42,10 +35,11 @@ export function HeroSection() {
 
   const stageRef = useRef(null);
 
+  // Cursor-follow tilt motion values (±6 deg max)
   const rawRotateX = useMotionValue(0);
   const rawRotateY = useMotionValue(0);
-  const rotateX = useSpring(rawRotateX, { stiffness: 150, damping: 22, mass: 0.6 });
-  const rotateY = useSpring(rawRotateY, { stiffness: 150, damping: 22, mass: 0.6 });
+  const rotateX = useSpring(rawRotateX, { stiffness: 140, damping: 20, mass: 0.6 });
+  const rotateY = useSpring(rawRotateY, { stiffness: 140, damping: 20, mass: 0.6 });
 
   useEffect(() => {
     const mq = window.matchMedia('(hover: none), (pointer: coarse)');
@@ -64,20 +58,20 @@ export function HeroSection() {
   }, []);
 
   useEffect(() => {
-    if (!isTabVisible || heroProducts.length <= 1 || prefersReducedMotion) return;
+    if (!isTabVisible || heroCases.length <= 1 || prefersReducedMotion) return;
     const timer = window.setTimeout(() => {
-      setActiveIndex((prev) => (prev + 1) % heroProducts.length);
+      setActiveIndex((prev) => (prev + 1) % heroCases.length);
     }, CROSSFADE_INTERVAL_MS);
     return () => window.clearTimeout(timer);
-  }, [isTabVisible, heroProducts.length, activeIndex, prefersReducedMotion]);
+  }, [isTabVisible, heroCases.length, activeIndex, prefersReducedMotion]);
 
   const handlePointerMove = (e) => {
     if (prefersReducedMotion || isTouchDevice || !stageRef.current) return;
     const rect = stageRef.current.getBoundingClientRect();
     const nx = (e.clientX - rect.left) / rect.width - 0.5;
     const ny = (e.clientY - rect.top) / rect.height - 0.5;
-    rawRotateY.set(nx * 10); // max ±5 deg
-    rawRotateX.set(-ny * 10); // max ±5 deg
+    rawRotateY.set(nx * 12);
+    rawRotateX.set(-ny * 12);
   };
 
   const handlePointerLeave = () => {
@@ -85,37 +79,35 @@ export function HeroSection() {
     rawRotateY.set(0);
   };
 
-  const currentProduct = heroProducts[activeIndex] || heroProducts[0];
-  const stageTheme = getProductStageTheme(currentProduct?.artworkId);
+  const currentHeroCase = heroCases[activeIndex] || heroCases[0];
 
   return (
     <section className="pt-4 pb-[var(--section-pad-y)] sm:pt-6 lg:pt-7">
       <div className="page-container">
         <div className="grid grid-cols-1 items-center gap-y-7 lg:grid-cols-12 lg:gap-x-[var(--grid-col-gap)]">
-          {/* START COLUMN (Cols 1-6): Editorial Cairo Display Headline + Conversion Actions */}
-          <div className="text-start lg:col-span-6 xl:col-span-6">
-            {/* Live phone-fit interactive stamp */}
+          {/* START COLUMN (Cols 1-6): Clean Modern Cairo Headline + Primary/Secondary CTAs */}
+          <div className="text-start lg:col-span-6">
             <div className="mb-4">
               {selectedModel ? (
                 <button
                   type="button"
                   onClick={() => setIsModelSelectorOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-full border border-[var(--cobalt)]/35 bg-[var(--cobalt-tint)] px-3.5 py-1.5 text-[13px] font-bold text-[var(--cobalt)] hover:border-[var(--cobalt)] cursor-pointer"
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] px-3.5 py-1.5 text-[13px] font-bold text-[var(--ink)] hover:border-[var(--ink)] cursor-pointer"
                 >
-                  <span className="h-2 w-2 rounded-full bg-[var(--cobalt)]" aria-hidden="true" />
+                  <span className="h-2 w-2 rounded-full bg-[var(--jade)]" aria-hidden="true" />
                   <span>
                     جاهز لمقاس{' '}
                     <bdi dir="ltr" className="latin-title">
                       {selectedModel.name}
                     </bdi>
                   </span>
-                  <span className="text-[var(--ink)] underline underline-offset-4">غيّر</span>
+                  <span className="text-[var(--brand)] underline underline-offset-4">غيّر</span>
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => setIsModelSelectorOpen(true)}
-                  className="stamp-sun hover:bg-[#f5c02f] transition-colors cursor-pointer"
+                  className="badge-brand-yellow hover:bg-[var(--brand-yellow-hover)] transition-colors cursor-pointer"
                 >
                   <PhoneHardwareIcon className="h-3.5 w-3.5" />
                   <span>متاح لـ {allPhoneModels.length} موديل موبايل — اختار موبايلك</span>
@@ -124,26 +116,25 @@ export function HeroSection() {
             </div>
 
             <h1 tabIndex={-1} className="type-display text-[var(--ink)] outline-none">
-              <span className="block">جراب يليق بمزاجك،</span>
-              <span className="mt-1 sm:mt-1.5 block text-[var(--brand)]">مطبوع لموبايلك بالملّي.</span>
+              <span className="block">جراب على مزاجك،</span>
+              <span className="mt-1 block text-[var(--brand)]">مطبوع لموبايلك بالظبط.</span>
             </h1>
 
             <p className="type-body mt-4 max-w-[46ch] text-[var(--ink-muted)]">
-              نقّي من طبعات غلاف الجاهزة أو ارفع صورتك واكتب اسمك. طباعة مطفية تقيلة ما بتبصمش، وتدفع كاش لما تستلم.
+              اختار من تصميمات غلاف الجاهزة أو ارفع صورتك واكتب اسمك. طباعة مطفية تقيلة ما بتبصمش، وتدفع كاش لما تستلم.
             </p>
 
             <div className="mt-6 flex flex-wrap items-center gap-3.5 sm:gap-4">
               <Link to="/categories" className="btn-primary">
-                <span>شوف التصميمات</span>
+                <span>شوف الجرابات</span>
                 <ForwardArrowRtlIcon className="h-4 w-4" />
               </Link>
               <Link to="/customize" className="btn-outline">
-                ارفع صورتك أو اسمك
+                صمّم جرابك
               </Link>
             </div>
 
-            {/* Honest Price & COD Fact Strip */}
-            <dl className="mt-7 grid grid-cols-3 gap-3 border-t border-[var(--border-subtle)] pt-4 max-w-[520px]">
+            <dl className="mt-7 grid max-w-[520px] grid-cols-3 gap-3 border-t border-[var(--border-subtle)] pt-4">
               <div>
                 <dt className="type-caption text-[12px]">التصميمات الجاهزة</dt>
                 <dd className="mt-0.5 text-[15px] sm:text-[16px] font-bold tabular-nums text-[var(--ink)]">
@@ -166,67 +157,34 @@ export function HeroSection() {
             </dl>
           </div>
 
-          {/* END COLUMN (Cols 7-12): Signature Print-Bed Showcase */}
-          <div className="lg:col-span-6 xl:col-span-6">
+          {/* END COLUMN (Cols 7-12): Unified Fixed `--card-bg` Stage with Original `heroCases` PNGs */}
+          <div className="lg:col-span-6">
             <div
               ref={stageRef}
               onPointerMove={handlePointerMove}
               onPointerLeave={handlePointerLeave}
-              style={{ backgroundColor: stageTheme.bg }}
-              className="relative overflow-hidden rounded-[18px] border-[1.5px] border-[var(--ink)] p-4 sm:p-5 lg:p-6 transition-colors duration-500 shadow-[-5px_5px_0_#14181F]"
+              className="product-stage relative overflow-hidden p-5 sm:p-6 lg:p-7"
             >
-              {/* Print-press corner registration marks (+) */}
-              <span aria-hidden="true" className="pointer-events-none absolute top-2.5 start-3 text-[12px] font-mono text-[var(--ink)]/35 select-none">+</span>
-              <span aria-hidden="true" className="pointer-events-none absolute top-2.5 end-3 text-[12px] font-mono text-[var(--ink)]/35 select-none">+</span>
-
-              {/* Top stage header: live hardware fit + model switcher */}
-              <div className="relative z-20 flex items-center justify-between gap-2">
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/85 border border-[var(--ink)]/12 px-3 py-1 text-[12.5px] font-semibold text-[var(--ink)]">
-                  <span className="text-[var(--ink-muted)]">القالب:</span>
-                  <bdi dir="ltr" className="latin-title font-bold">
-                    {phoneSelection.status === 'pending' && phoneSelection.pendingPhoneName
-                      ? phoneSelection.pendingPhoneName
-                      : visualPreviewModel.name}
-                  </bdi>
-                  <button
-                    type="button"
-                    onClick={() => setIsModelSelectorOpen(true)}
-                    className="ms-1 font-bold text-[var(--cobalt)] underline underline-offset-2 cursor-pointer"
-                  >
-                    غيّر
-                  </button>
-                </div>
-
-                <span
-                  dir="ltr"
-                  className="latin-title rounded-[6px] bg-[var(--ink)] px-2 py-0.5 text-[11.5px] font-bold text-[var(--paper)] tabular-nums"
-                >
-                  0{activeIndex + 1} / 0{heroProducts.length}
-                </span>
-              </div>
-
-              {/* Center Stage: 3D Tilting Case + Edition Switcher Rail */}
-              <div className="mt-4 grid grid-cols-1 items-center gap-4 sm:grid-cols-12">
-                {/* Case showcase (cols 1-7 on sm+) */}
+              <div className="grid grid-cols-1 items-center gap-5 sm:grid-cols-12">
+                {/* Original transparent PNG phone case showcase */}
                 <div
-                  className="flex flex-col items-center justify-center py-1 sm:col-span-7"
+                  className="flex flex-col items-center justify-center sm:col-span-7"
                   style={{ perspective: '1100px' }}
                 >
                   <motion.div
                     initial={
                       prefersReducedMotion
                         ? { opacity: 0 }
-                        : { opacity: 0, rotateY: -10, rotateX: 5, rotateZ: -2, y: 14 }
+                        : { opacity: 0, rotateY: -12, rotateX: 6, rotateZ: -3, y: 16 }
                     }
                     animate={
                       prefersReducedMotion
                         ? { opacity: 1 }
                         : { opacity: 1, rotateY: 0, rotateX: 0, rotateZ: 0, y: 0 }
                     }
-                    transition={{ duration: 0.65, ease: EASE }}
-                    className="w-[164px] sm:w-[184px] lg:w-[196px] xl:w-[216px]"
+                    transition={{ duration: 0.7, ease: EASE }}
+                    className="w-[184px] sm:w-[208px] lg:w-[216px] xl:w-[234px]"
                   >
-                    {/* Non-rotating shadow wrapper keeps studio overhead light constant */}
                     <div className="case-wall-shadow-hero" style={{ perspective: '1100px' }}>
                       <motion.div
                         style={
@@ -241,64 +199,66 @@ export function HeroSection() {
                         }
                         animate={
                           !prefersReducedMotion && isTouchDevice && isTabVisible
-                            ? { y: [0, -6, 0] }
+                            ? { y: [0, -8, 0] }
                             : { y: 0 }
                         }
                         transition={
                           !prefersReducedMotion && isTouchDevice && isTabVisible
-                            ? { duration: 5, repeat: Infinity, ease: 'easeInOut' }
+                            ? { duration: 5.5, repeat: Infinity, ease: 'easeInOut' }
                             : { duration: 0.3 }
                         }
                       >
-                        <Link
-                          to={`/products/${currentProduct?.id || ''}`}
-                          aria-label={`اعرض تفاصيل جراب ${currentProduct?.name || ''}`}
-                          className="block rounded-[28px]"
+                        <div
+                          dir="ltr"
+                          role="img"
+                          aria-label={currentHeroCase?.altAr || currentHeroCase?.name || ''}
+                          className="relative aspect-[720/1426] w-full select-none"
                         >
-                          <PhoneCaseMockup
-                            model={visualPreviewModel}
-                            interactive={false}
-                            shadow={false}
-                            artworkNode={
-                              <g>
-                                {heroProducts.map((prod, idx) => {
-                                  const isActive = idx === activeIndex;
-                                  return (
-                                    <motion.g
-                                      key={prod.id}
-                                      initial={false}
-                                      animate={{ opacity: isActive ? 1 : 0 }}
-                                      transition={{
-                                        duration: prefersReducedMotion ? 0.15 : 0.55,
-                                        ease: EASE,
-                                      }}
-                                    >
-                                      <CaseArtwork artworkId={prod.artworkId} />
-                                    </motion.g>
-                                  );
-                                })}
-                              </g>
-                            }
-                            className="w-full"
-                          />
-                        </Link>
+                          {heroCases.map((item, idx) => {
+                            const isActive = idx === activeIndex;
+                            return (
+                              <motion.img
+                                key={item.id}
+                                src={item.imageUrl}
+                                alt=""
+                                aria-hidden="true"
+                                draggable={false}
+                                loading={idx === 0 ? 'eager' : 'lazy'}
+                                fetchPriority={idx === 0 ? 'high' : 'auto'}
+                                decoding="async"
+                                initial={false}
+                                animate={{ opacity: isActive ? 1 : 0 }}
+                                transition={
+                                  prefersReducedMotion
+                                    ? { duration: 0.25, ease: EASE }
+                                    : isActive
+                                      ? { duration: 0.6, ease: EASE }
+                                      : { duration: 0.15, delay: 0.45, ease: EASE }
+                                }
+                                className={`pointer-events-none absolute inset-0 h-full w-full object-contain select-none ${
+                                  isActive ? 'z-20' : 'z-10'
+                                }`}
+                              />
+                            );
+                          })}
+                        </div>
                       </motion.div>
                     </div>
                   </motion.div>
                 </div>
 
-                {/* Edition selector rail (cols 8-12 on sm+) */}
-                <div className="flex flex-col justify-between gap-2 sm:col-span-5 text-start">
-                  <p className="hidden sm:block text-[12px] font-bold text-[var(--ink-muted)]">
-                    طبعات مختارة من المطبعة:
+                {/* Placard & edition selector on the unified stage */}
+                <div className="flex flex-col justify-center gap-3 text-start sm:col-span-5">
+                  <p className="type-caption text-[13px]">
+                    طباعة مطفية عالية الدقة بمقاس موبايلك وفتحة كاميرته بالظبط.
                   </p>
 
                   <div
                     role="group"
-                    aria-label="اختار طبعة العرض"
-                    className="grid grid-cols-2 gap-1.5 sm:grid-cols-1"
+                    aria-label="معاينة تصميمات العرض"
+                    className="flex flex-col gap-1.5"
                   >
-                    {heroProducts.map((item, idx) => {
+                    {heroCases.map((item, idx) => {
                       const isCurrent = idx === activeIndex;
                       return (
                         <button
@@ -306,32 +266,25 @@ export function HeroSection() {
                           type="button"
                           onClick={() => setActiveIndex(idx)}
                           aria-pressed={isCurrent}
-                          className={`flex min-h-[44px] w-full flex-col items-start justify-center gap-0.5 rounded-[var(--radius-ui)] border px-2.5 py-1.5 text-start transition-all duration-150 sm:flex-row sm:items-center sm:justify-between sm:gap-2 sm:px-3 cursor-pointer ${
+                          className={`flex min-h-[42px] w-full items-center gap-2.5 rounded-[var(--radius-ui)] border px-3 py-1.5 text-start transition-colors duration-150 cursor-pointer ${
                             isCurrent
-                              ? 'border-[var(--ink)] bg-[var(--surface)] text-[var(--ink)] shadow-[-2px_2px_0_#14181F]'
-                              : 'border-transparent bg-white/50 text-[var(--ink-muted)] hover:bg-white/80 hover:text-[var(--ink)]'
+                              ? 'border-[var(--border-strong)] bg-[var(--surface)] font-bold text-[var(--ink)]'
+                              : 'border-transparent bg-white/55 font-medium text-[var(--ink-muted)] hover:bg-[var(--surface)] hover:text-[var(--ink)]'
                           }`}
                         >
-                          <span className="latin-title w-full truncate text-[12.5px] sm:w-auto sm:text-[13.5px] font-bold">
+                          <span
+                            aria-hidden="true"
+                            className={`block h-[3px] shrink-0 rounded-full transition-all duration-200 ${
+                              isCurrent ? 'w-5 bg-[var(--brand)]' : 'w-3 bg-[var(--ink)]/25'
+                            }`}
+                          />
+                          <span className="latin-title truncate text-[13.5px] sm:text-[14px]">
                             <bdi dir="ltr">{item.name}</bdi>
-                          </span>
-                          <span className="shrink-0 text-[11.5px] sm:text-[12px] font-bold tabular-nums text-[var(--ink)]">
-                            {item.price} {STORE_CONFIG.currencyLabel}
                           </span>
                         </button>
                       );
                     })}
                   </div>
-
-                  {currentProduct ? (
-                    <Link
-                      to={`/products/${currentProduct.id}`}
-                      className="mt-1 inline-flex min-h-[40px] items-center justify-between rounded-[var(--radius-ui)] bg-[var(--ink)] px-3.5 text-[13px] font-bold text-[var(--paper)] hover:bg-[var(--brand)] transition-colors"
-                    >
-                      <span>اطلب الطبعة دي</span>
-                      <ForwardArrowRtlIcon className="h-3.5 w-3.5" />
-                    </Link>
-                  ) : null}
                 </div>
               </div>
             </div>

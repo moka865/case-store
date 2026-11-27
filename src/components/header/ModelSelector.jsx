@@ -7,10 +7,10 @@ import { BackArrowRtlIcon, CheckIcon, CloseIcon, SearchIcon } from '../icons/Ico
 const EASE = [0.22, 1, 0.36, 1];
 
 /**
- * Phone model selector:
- * - Desktop: anchored print-studio dropdown panel under the top-left selector
+ * Phone model selector panel:
+ * - Desktop: anchored dropdown under the top-left selector
  * - Mobile: bottom sheet
- * Includes 7 brand tabs, live search input, model list, and "موبايلي مش في القايمة" request form.
+ * Uses unified brand tokens (`--surface`, `--card-bg`, `--ink`, `--brand`, `--brand-yellow-tint`).
  */
 export function ModelSelector({ open, onClose }) {
   const {
@@ -24,7 +24,7 @@ export function ModelSelector({ open, onClose }) {
   const prefersReducedMotion = useReducedMotion();
   const [activeBrand, setActiveBrand] = useState(selectedModel?.brand || phoneBrands[0]);
   const [query, setQuery] = useState('');
-  const [view, setView] = useState('list'); // 'list' | 'missing-form' | 'missing-confirmed'
+  const [view, setView] = useState('list');
 
   const [phoneNameInput, setPhoneNameInput] = useState('');
   const [mobileInput, setMobileInput] = useState('');
@@ -122,15 +122,13 @@ export function ModelSelector({ open, onClose }) {
   };
 
   const panelBody = (
-    <div className="flex flex-col text-start" style={{ maxHeight: isMobileViewport ? '84dvh' : '540px' }}>
-      {/* Mobile drag handle visual cue */}
+    <div className="flex flex-col text-start text-[var(--ink)]" style={{ maxHeight: isMobileViewport ? '84dvh' : '540px' }}>
       {isMobileViewport ? (
         <div className="flex justify-center pt-2.5" aria-hidden="true">
           <span className="h-1 w-10 rounded-full bg-[var(--ink)]/20" />
         </div>
       ) : null}
 
-      {/* Header row */}
       <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 pt-3.5 pb-3">
         {view === 'missing-form' ? (
           <button
@@ -146,7 +144,7 @@ export function ModelSelector({ open, onClose }) {
           </button>
         ) : (
           <div>
-            <h2 className="font-[var(--font-display)] text-[19px] font-bold text-[var(--ink)]">
+            <h2 className="type-h3 text-[18px] text-[var(--ink)]">
               {view === 'missing-confirmed' ? 'استلمنا طلب موديلك' : 'اختار موديل موبايلك'}
             </h2>
             {view === 'list' ? (
@@ -161,7 +159,7 @@ export function ModelSelector({ open, onClose }) {
           type="button"
           onClick={onClose}
           aria-label="إغلاق قائمة الموديلات"
-          className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-ui)] text-[var(--ink-muted)] hover:bg-[var(--surface-warm)] hover:text-[var(--ink)] cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-ui)] text-[var(--ink-muted)] hover:bg-[var(--card-bg)] hover:text-[var(--ink)] cursor-pointer"
         >
           <CloseIcon className="h-5 w-5" />
         </button>
@@ -169,7 +167,6 @@ export function ModelSelector({ open, onClose }) {
 
       {view === 'list' ? (
         <>
-          {/* Brand tabs */}
           <div
             role="tablist"
             aria-label="ماركات الموبايلات"
@@ -189,8 +186,8 @@ export function ModelSelector({ open, onClose }) {
                   }}
                   className={`min-h-[36px] shrink-0 rounded-full px-3 text-[13.5px] font-bold transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-[var(--cobalt)] text-white'
-                      : 'bg-[var(--surface-warm)] text-[var(--ink)] hover:bg-[var(--cobalt-tint)]'
+                      ? 'bg-[var(--ink)] text-white'
+                      : 'bg-[var(--card-bg)] text-[var(--ink)] hover:bg-[var(--surface-muted)]'
                   }`}
                 >
                   <bdi dir="ltr" className="latin-title">{brand}</bdi>
@@ -199,7 +196,6 @@ export function ModelSelector({ open, onClose }) {
             })}
           </div>
 
-          {/* Search input */}
           <div className="px-5 py-2">
             <label htmlFor="model-search-input" className="sr-only">
               ابحث عن موديل موبايلك
@@ -213,12 +209,11 @@ export function ModelSelector({ open, onClose }) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="اكتب اسم الموديل... مثلاً S24 أو Note 13"
-                className="min-h-[44px] w-full rounded-[var(--radius-ui)] border-[1.5px] border-[var(--border-subtle)] focus:border-[var(--cobalt)] bg-[var(--paper)] ps-10 pe-3 text-[14.5px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
+                className="min-h-[44px] w-full rounded-[var(--radius-ui)] border border-[var(--border-strong)] bg-[var(--paper)] ps-10 pe-3 text-[14.5px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
               />
             </div>
           </div>
 
-          {/* Model list */}
           <div
             role="listbox"
             aria-label="قائمة الموديلات"
@@ -237,15 +232,15 @@ export function ModelSelector({ open, onClose }) {
                         onClick={() => selectPhoneModel(model.id)}
                         className={`flex min-h-[44px] w-full items-center justify-between rounded-[var(--radius-ui)] px-3.5 text-start transition-colors cursor-pointer ${
                           isCurrent
-                            ? 'bg-[var(--cobalt-tint)] border-[1.5px] border-[var(--cobalt)] font-bold text-[var(--ink)]'
-                            : 'text-[var(--ink)] hover:bg-[var(--surface-warm)]'
+                            ? 'bg-[var(--brand-yellow-tint)] border border-[var(--ink)]/25 font-bold text-[var(--ink)]'
+                            : 'text-[var(--ink)] hover:bg-[var(--card-bg)]'
                         }`}
                       >
                         <bdi dir="ltr" className="latin-title text-[15px] font-semibold">
                           {model.name}
                         </bdi>
                         {isCurrent ? (
-                          <span className="inline-flex items-center gap-1 text-[12.5px] font-bold text-[var(--cobalt)]">
+                          <span className="inline-flex items-center gap-1 text-[12.5px] font-bold text-[var(--jade)]">
                             <CheckIcon className="h-3.5 w-3.5" />
                             <span>مختار</span>
                           </span>
@@ -266,8 +261,7 @@ export function ModelSelector({ open, onClose }) {
             )}
           </div>
 
-          {/* Persistent "My phone isn't in the list" option */}
-          <div className="border-t border-[var(--border-subtle)] bg-[var(--paper)]/70 px-5 py-3">
+          <div className="border-t border-[var(--border-subtle)] bg-[var(--paper)] px-5 py-3">
             <button
               type="button"
               onClick={() => setView('missing-form')}
@@ -282,7 +276,7 @@ export function ModelSelector({ open, onClose }) {
       {view === 'missing-form' ? (
         <form onSubmit={handleMissingSubmit} noValidate className="space-y-4 px-5 pt-4 pb-5">
           <p className="text-[14.5px] leading-[1.65] text-[var(--ink-muted)]">
-            اكتب نوع موبايلك ورقمك وهنتأكدلك إن قالبه متاح في المطبعة قبل ما تطلب.
+            اكتب نوع موبايلك ورقمك وهنتأكدلك إن مقاسه متاح عندنا قبل ما تطلب.
           </p>
 
           <div>
@@ -301,7 +295,7 @@ export function ModelSelector({ open, onClose }) {
               placeholder="مثلاً: Nothing Phone 2a"
               aria-invalid={Boolean(formErrors.phoneName)}
               aria-describedby={formErrors.phoneName ? 'missing-phone-name-err' : undefined}
-              className="min-h-[46px] w-full rounded-[var(--radius-ui)] border-[1.5px] border-[var(--input-border)] bg-[var(--surface)] px-3.5 text-[15px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
+              className="min-h-[46px] w-full rounded-[var(--radius-ui)] border border-[var(--border-strong)] bg-[var(--surface)] px-3.5 text-[15px] text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
             />
             {formErrors.phoneName ? (
               <p id="missing-phone-name-err" className="mt-1.5 text-[13px] font-semibold text-[var(--brand)]">
@@ -328,7 +322,7 @@ export function ModelSelector({ open, onClose }) {
               placeholder="01012345678"
               aria-invalid={Boolean(formErrors.mobileNumber)}
               aria-describedby={formErrors.mobileNumber ? 'missing-phone-mobile-err' : undefined}
-              className="min-h-[46px] w-full rounded-[var(--radius-ui)] border-[1.5px] border-[var(--input-border)] bg-[var(--surface)] px-3.5 text-start text-[15px] tabular-nums text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
+              className="min-h-[46px] w-full rounded-[var(--radius-ui)] border border-[var(--border-strong)] bg-[var(--surface)] px-3.5 text-start text-[15px] tabular-nums text-[var(--ink)] placeholder:text-[var(--ink-muted)]"
             />
             {formErrors.mobileNumber ? (
               <p id="missing-phone-mobile-err" className="mt-1.5 text-[13px] font-semibold text-[var(--brand)]">
@@ -345,7 +339,7 @@ export function ModelSelector({ open, onClose }) {
 
       {view === 'missing-confirmed' ? (
         <div className="space-y-4 px-5 pt-4 pb-5">
-          <div className="rounded-[var(--radius-ui)] bg-[var(--jade-tint)] border border-[var(--jade)]/30 p-3.5">
+          <div className="rounded-[var(--radius-ui)] bg-[var(--jade-tint)] border border-[var(--jade)]/25 p-3.5">
             <p className="text-[15.5px] leading-[1.65] font-bold text-[var(--jade)]">
               خدمة العملاء هتتواصل معاك لتأكيد الموديل
             </p>
@@ -377,7 +371,7 @@ export function ModelSelector({ open, onClose }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, ease: EASE }}
               onClick={onClose}
-              className="fixed inset-0 bg-[#14181F]/45"
+              className="fixed inset-0 bg-[#111317]/45"
             />
             <motion.div
               ref={panelRef}
@@ -385,7 +379,7 @@ export function ModelSelector({ open, onClose }) {
               animate={prefersReducedMotion ? { opacity: 1 } : { y: 0 }}
               exit={prefersReducedMotion ? { opacity: 0 } : { y: '100%' }}
               transition={{ duration: 0.24, ease: EASE }}
-              className="fixed inset-x-0 bottom-0 z-50 rounded-t-[18px] border-t-2 border-[var(--ink)] bg-[var(--surface)]"
+              className="fixed inset-x-0 bottom-0 z-50 rounded-t-[16px] border-t border-[var(--border-strong)] bg-[var(--surface)]"
             >
               {panelBody}
             </motion.div>
@@ -406,7 +400,8 @@ export function ModelSelector({ open, onClose }) {
           animate={{ opacity: 1, y: 0 }}
           exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
           transition={{ duration: 0.2, ease: EASE }}
-          className="absolute end-0 top-[calc(100%+10px)] z-50 w-[416px] overflow-hidden rounded-[14px] border-[1.5px] border-[var(--ink)] bg-[var(--surface)] shadow-[-5px_5px_0_#14181F]"
+          style={{ boxShadow: 'var(--shadow-panel)' }}
+          className="absolute end-0 top-[calc(100%+10px)] z-50 w-[412px] overflow-hidden rounded-[var(--radius-stage)] border border-[var(--border-strong)] bg-[var(--surface)]"
         >
           {panelBody}
         </motion.div>

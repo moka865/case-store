@@ -4,7 +4,7 @@ import { CloseIcon } from '../icons/Icons';
 const EASE = [0.22, 1, 0.36, 1];
 
 /**
- * Non-blocking print-ticket popover anchored beneath the phone-model selector on first visit.
+ * Gentle first-visit popover anchored beneath the phone-model selector.
  */
 export function FirstVisitPopover({ open, onChooseNow, onDismiss }) {
   const prefersReducedMotion = useReducedMotion();
@@ -19,17 +19,18 @@ export function FirstVisitPopover({ open, onChooseNow, onDismiss }) {
           animate={{ opacity: 1, y: 0 }}
           exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
           transition={{ duration: 0.22, ease: EASE }}
-          className="absolute end-0 top-[calc(100%+10px)] z-40 w-[268px] max-w-[calc(100vw-32px)] rounded-[12px] border-[1.5px] border-[var(--ink)] bg-[var(--surface)] p-3.5 text-start shadow-[-4px_4px_0_#14181F]"
+          style={{ boxShadow: 'var(--shadow-panel)' }}
+          className="absolute end-0 top-[calc(100%+10px)] z-40 w-[268px] max-w-[calc(100vw-32px)] rounded-[var(--radius-stage)] border border-[var(--border-strong)] bg-[var(--surface)] p-3.5 text-start text-[var(--ink)]"
         >
           <div className="flex items-start justify-between gap-2">
             <p className="text-[13.5px] leading-[1.55] font-semibold text-[var(--ink)]">
-              اختار موديل موبايلك الأول عشان نعرضلك الجرابات اللي تركب عليه بالملّي.
+              اختار موديل موبايلك الأول عشان تشوف الجرابات اللي تناسبه بالظبط.
             </p>
             <button
               type="button"
               onClick={onDismiss}
               aria-label="إغلاق التنبيه"
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[var(--ink-muted)] hover:bg-[var(--surface-warm)] hover:text-[var(--ink)] cursor-pointer"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[var(--ink-muted)] hover:bg-[var(--card-bg)] hover:text-[var(--ink)] cursor-pointer"
             >
               <CloseIcon className="h-4 w-4" />
             </button>

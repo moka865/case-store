@@ -4,16 +4,15 @@ import { Link } from 'react-router-dom';
 import { STORE_CONFIG } from '../../config/store';
 import { CheckIcon, CustomPenIcon } from '../icons/Icons';
 import { PhoneCaseMockup } from '../mockup/PhoneCaseMockup';
-import { getProductStageTheme } from '../mockup/productPresentation';
 
 const EASE = [0.22, 1, 0.36, 1];
 
 /**
- * غلاف Signature Product Card:
- * - Real crawlable `<Link to="/products/:slug">` wrapping both the curated mineral studio plinth and title
- * - Per-artwork tuned matte stage backdrop + subtle floor shadow + GPU silhouette hover lift
- * - Clear phone-model compatibility indicator when a model is selected
- * - Tactile quick-add button ("ضيف للسلة" -> Jade "اتضاف ✓") + optional printed-name entry point
+ * Unified غلاف Product Card:
+ * - Every single product card shares the exact same `.product-stage` (`--card-bg: #ECEAE4`)
+ *   background regardless of artwork so the brand identity stays 100% consistent
+ * - Real crawlable `<Link to="/products/:slug">` wrapping both the case stage and title
+ * - Consistent silhouette shadow + gentle GPU hover lift
  */
 export function ProductCard({
   product,
@@ -24,7 +23,6 @@ export function ProductCard({
 }) {
   const [justAdded, setJustAdded] = useState(false);
   const prefersReducedMotion = useReducedMotion();
-  const stage = getProductStageTheme(product.artworkId);
   const productUrl = `/products/${product.id}`;
 
   const handleAdd = () => {
@@ -47,17 +45,15 @@ export function ProductCard({
       }}
       className="case-lift-group group flex h-full flex-col"
     >
-      {/* Curated Studio Backdrop Plinth — real crawlable <a href="/products/:slug"> */}
+      {/* Fixed Brand Stage Surface (`--card-bg`) — identical across every product */}
       <Link
         to={productUrl}
         aria-label={`${product.name} — ${product.price} ${STORE_CONFIG.currencyLabel}`}
-        style={{ backgroundColor: stage.bg }}
-        className="relative flex aspect-[4/4.75] w-full flex-col items-center justify-between overflow-hidden rounded-[var(--radius-stage)] border border-[rgba(20,24,31,0.10)] p-3 sm:p-4 transition-colors duration-200 group-hover:border-[var(--ink)]/35"
+        className="product-stage relative flex aspect-[4/4.75] w-full flex-col items-center justify-between overflow-hidden p-3 sm:p-4 transition-colors duration-200 group-hover:border-[var(--border-strong)]"
       >
-        {/* Top studio ticket metadata bar */}
         <div className="relative z-10 flex w-full items-center justify-between gap-1.5">
           {categoryNameAr ? (
-            <span className="inline-flex items-center rounded-[6px] bg-white/80 px-2 py-0.5 text-[11.5px] font-semibold text-[var(--ink)]">
+            <span className="inline-flex items-center rounded-[6px] bg-[var(--surface)]/85 px-2 py-0.5 text-[11.5px] font-semibold text-[var(--ink)]">
               {categoryNameAr}
             </span>
           ) : (
@@ -65,23 +61,15 @@ export function ProductCard({
           )}
 
           {selectedModel ? (
-            <span className="inline-flex max-w-[62%] items-center gap-1 truncate rounded-[6px] bg-[var(--cobalt-tint)] border border-[var(--cobalt)]/25 px-2 py-0.5 text-[11px] font-bold text-[var(--cobalt)]">
+            <span className="inline-flex max-w-[62%] items-center gap-1 truncate rounded-[6px] bg-[var(--surface)] px-2 py-0.5 text-[11px] font-bold text-[var(--jade)]">
               <CheckIcon className="h-3 w-3 shrink-0" />
-              <bdi dir="ltr" className="latin-title truncate">
+              <bdi dir="ltr" className="latin-title truncate text-[var(--ink)]">
                 {selectedModel.name}
               </bdi>
             </span>
-          ) : (
-            <span
-              dir="ltr"
-              className="latin-title text-[11px] font-bold text-[var(--ink)]/45 tabular-nums"
-            >
-              #{stage.editionNo}
-            </span>
-          )}
+          ) : null}
         </div>
 
-        {/* Centered floating case mockup */}
         <div className="relative z-10 my-auto flex w-full items-center justify-center py-1.5">
           <div className="w-[56%] max-w-[184px]">
             <PhoneCaseMockup
@@ -93,19 +81,13 @@ export function ProductCard({
           </div>
         </div>
 
-        {/* Grounding studio plinth shadow ellipse + subtle corner registration tick */}
-        <div className="relative z-0 flex w-full items-center justify-center pb-0.5" aria-hidden="true">
-          <span
-            className="block h-2 w-[48%] rounded-full transition-transform duration-250 group-hover:scale-x-90"
-            style={{ backgroundColor: stage.plinth }}
-          />
-        </div>
+        <div className="relative z-0 h-1 w-full" aria-hidden="true" />
       </Link>
 
-      {/* Crisp aligned caption + tactile conversion bar */}
+      {/* Aligned product caption + consistent CTA row */}
       <div className="mt-3 flex flex-1 flex-col justify-between gap-2.5 text-start">
         <div className="flex flex-col items-start gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
-          <h3 className="w-full min-w-0 truncate text-[14.5px] sm:w-auto sm:text-[16px] font-bold leading-[1.3] text-[var(--ink)]">
+          <h3 className="w-full min-w-0 truncate text-[14.5px] sm:w-auto sm:text-[16px] font-bold leading-[1.35] text-[var(--ink)]">
             <Link
               to={productUrl}
               className="hover:text-[var(--brand)] transition-colors"
@@ -123,10 +105,10 @@ export function ProductCard({
             type="button"
             onClick={handleAdd}
             aria-live="polite"
-            className={`inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-ui)] border-[1.5px] px-3 text-[13.5px] sm:text-[14px] font-bold transition-all duration-150 cursor-pointer ${
+            className={`inline-flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-ui)] border px-3 text-[13.5px] sm:text-[14px] font-bold transition-colors duration-150 cursor-pointer ${
               justAdded
                 ? 'border-[var(--jade)] bg-[var(--jade)] text-white'
-                : 'border-[var(--ink)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--brand)] hover:text-white hover:border-[var(--ink)] active:translate-y-[1px]'
+                : 'border-[var(--border-strong)] bg-[var(--surface)] text-[var(--ink)] hover:border-[var(--brand)] hover:bg-[var(--brand)] hover:text-white'
             }`}
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -160,7 +142,7 @@ export function ProductCard({
             to={`${productUrl}?name=1`}
             title="اطبع اسمك على التصميم ده"
             aria-label={`اطبع اسمك على جراب ${product.name}`}
-            className="hidden sm:inline-flex min-h-[40px] shrink-0 items-center justify-center gap-1 rounded-[var(--radius-ui)] border border-[var(--border-subtle)] bg-[var(--surface-warm)]/75 px-2.5 text-[12.5px] font-semibold text-[var(--ink)] hover:border-[var(--ink)] hover:bg-[var(--sun-soft)] transition-colors"
+            className="hidden sm:inline-flex min-h-[40px] shrink-0 items-center justify-center gap-1 rounded-[var(--radius-ui)] border border-[var(--border-subtle)] bg-[var(--card-bg)] px-2.5 text-[12.5px] font-semibold text-[var(--ink)] hover:border-[var(--border-strong)] transition-colors"
           >
             <CustomPenIcon className="h-3.5 w-3.5" />
             <span>باسمك</span>

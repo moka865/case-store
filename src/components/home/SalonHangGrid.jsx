@@ -34,9 +34,9 @@ function useResponsiveCols() {
 }
 
 /**
- * Dense, responsive product showcase grid for غلاف.
- * Scales columns up on wide screens (2 -> 3 -> 4 -> 5 -> 6) so wide desktop screens
- * pack more product editions cleanly without dead horizontal bands.
+ * Unified responsive product grid for غلاف.
+ * Every product card uses the same fixed `--card-bg` stage background,
+ * scaling columns up on wide screens (2 -> 3 -> 4 -> 5 -> 6).
  */
 export function SalonHangGrid({
   categoryId = null,
@@ -82,7 +82,6 @@ export function SalonHangGrid({
 
   const products = useMemo(() => {
     if (previewRows) {
-      // Scale home preview cleanly with viewport column count so rows stay full
       const targetCount = Math.max(6, previewRows * cols);
       return allMatching.slice(0, targetCount);
     }
@@ -106,7 +105,6 @@ export function SalonHangGrid({
       }`}
     >
       <div className="page-container">
-        {/* Header bar: Section title + ModelChip + View-all link */}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <h2 id="designs-heading" className="type-h2 text-[var(--ink)]">
@@ -129,13 +127,12 @@ export function SalonHangGrid({
               to="/categories"
               className="hidden sm:inline-flex items-center gap-1.5 text-[14.5px] font-bold text-[var(--ink)] hover:text-[var(--brand)] transition-colors"
             >
-              <span>الكتالوج كامل ({categoryCounts.all ?? 14})</span>
+              <span>كل الجرابات ({categoryCounts.all ?? 14})</span>
               <ForwardArrowRtlIcon className="h-4 w-4" />
             </Link>
           ) : null}
         </div>
 
-        {/* Optional inline quick-category filter strip on the Home Page */}
         {showQuickCategories ? (
           <div
             role="tablist"
@@ -149,8 +146,8 @@ export function SalonHangGrid({
               onClick={() => setLocalCategoryId(null)}
               className={`inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[13.5px] font-bold transition-colors cursor-pointer ${
                 localCategoryId === null
-                  ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]'
-                  : 'border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--surface-warm)]'
+                  ? 'border-[var(--ink)] bg-[var(--ink)] text-white'
+                  : 'border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--card-bg)]'
               }`}
             >
               <span>الكل</span>
@@ -169,8 +166,8 @@ export function SalonHangGrid({
                   onClick={() => setLocalCategoryId(cat.id)}
                   className={`inline-flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[13.5px] font-bold transition-colors cursor-pointer ${
                     isSelected
-                      ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]'
-                      : 'border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--surface-warm)]'
+                      ? 'border-[var(--ink)] bg-[var(--ink)] text-white'
+                      : 'border-[var(--border-subtle)] bg-[var(--surface)] text-[var(--ink)] hover:bg-[var(--card-bg)]'
                   }`}
                 >
                   <span>{cat.nameAr}</span>
@@ -181,7 +178,6 @@ export function SalonHangGrid({
           </div>
         ) : null}
 
-        {/* Product Grid or Actionable Empty State */}
         {products.length > 0 ? (
           <>
             <div
@@ -207,7 +203,7 @@ export function SalonHangGrid({
             {showViewAllLink ? (
               <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border-subtle)] pt-5">
                 <p className="type-caption text-[14px]">
-                  كل التصميمات بتتطبع مطفي ضد البصمات وبمقاس فتحة كاميرا موبايلك بالملّي.
+                  كل الجرابات بتتطبع مطفي ضد البصمات وبمقاس فتحة كاميرا موبايلك بالظبط.
                 </p>
                 <Link to="/categories" className="btn-outline !min-h-[44px]">
                   <span>شوف كل الجرابات ({categoryCounts.all ?? 14})</span>
@@ -250,7 +246,7 @@ export function SalonHangGrid({
                 </button>
               )}
               <Link to="/customize" className="btn-outline">
-                ارفع تصميمك المخصوص
+                ارفع تصميمك
               </Link>
             </div>
           </div>

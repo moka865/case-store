@@ -5,8 +5,7 @@ import { useStore } from '../../context/StoreContext';
 import { CashCodIcon } from '../icons/Icons';
 
 /**
- * Honest, data-driven COD & Governorate Shipping ledger on the Home Page.
- * Makes payment terms, shipping fees, and delivery timing transparent before checkout.
+ * Honest, data-driven COD & Governorate Shipping section on the Home Page.
  */
 export function ShippingTrustBand() {
   const { governorates } = useStore();
@@ -51,7 +50,7 @@ export function ShippingTrustBand() {
   return (
     <section aria-labelledby="shipping-trust-heading" className="section-band">
       <div className="page-container">
-        <div className="rounded-[16px] border border-[var(--border-subtle)] bg-[var(--surface)] p-5 sm:p-7">
+        <div className="rounded-[var(--radius-stage)] border border-[var(--border-subtle)] bg-[var(--surface)] p-5 sm:p-7">
           <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-x-[var(--grid-col-gap)]">
             <div className="text-start lg:col-span-4">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-[var(--jade-tint)] px-3 py-1 text-[12.5px] font-bold text-[var(--jade)]">
@@ -59,10 +58,10 @@ export function ShippingTrustBand() {
                 <span>{STORE_CONFIG.paymentLabelAr} فقط</span>
               </div>
               <h2 id="shipping-trust-heading" className="type-h2 mt-3 text-[var(--ink)]">
-                شحن سريع ومصاريف واضحة لكل المحافظات
+                شحن واضح لكل المحافظات
               </h2>
               <p className="type-caption mt-2 max-w-[42ch] text-[14px]">
-                بتدفع كاش للمندوب وقت الاستلام من غير فيزا. بنطبع جرابك مخصوص في {STORE_CONFIG.productionDays} يوم عمل وبعدها يتشحن لمحافظتك.
+                بتدفع كاش للمندوب وقت الاستلام من غير كارت بنكي. بنطبع جرابك مخصوص في {STORE_CONFIG.productionDays} يوم عمل وبعدها يتشحن لمحافظتك.
               </p>
               <div className="mt-3">
                 <Link to="/how-it-works" className="btn-secondary !min-h-[38px] !text-[14px]">
@@ -75,7 +74,7 @@ export function ShippingTrustBand() {
               {tiers.map((tier) => (
                 <div
                   key={tier.region}
-                  className="flex flex-col justify-between rounded-[12px] border border-[var(--border-subtle)] bg-[var(--paper)] p-4 text-start"
+                  className="product-stage flex flex-col justify-between p-4 text-start"
                 >
                   <dt className="text-[14px] font-bold text-[var(--ink)]">{tier.region}</dt>
                   <dd className="mt-3 text-[22px] font-extrabold tabular-nums text-[var(--brand)]">

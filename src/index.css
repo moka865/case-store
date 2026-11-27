@@ -4,23 +4,23 @@
    Self-hosted subsetted WOFF2 fonts (zero external CDN requests, zero CLS)
    ========================================================================== */
 
-/* Display Arabic: Reem Kufi Variable (400..700) */
+/* Clean Modern Headline Arabic: Cairo Variable (200..1000) */
 @font-face {
-  font-family: "Reem Kufi";
+  font-family: "Cairo";
   font-style: normal;
   font-display: swap;
-  font-weight: 400 700;
-  src: url("/fonts/reem-kufi-arabic-wght-normal.woff2") format("woff2-variations");
+  font-weight: 200 1000;
+  src: url("/fonts/cairo-arabic-wght-normal.woff2") format("woff2-variations");
   unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF,
     U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
 }
 
 @font-face {
-  font-family: "Reem Kufi Fallback";
+  font-family: "Cairo Fallback";
   src: local("Segoe UI"), local("Tahoma"), local("Arial");
-  size-adjust: 102%;
-  ascent-override: 108%;
-  descent-override: 34%;
+  size-adjust: 100%;
+  ascent-override: 112%;
+  descent-override: 42%;
   line-gap-override: 0%;
 }
 
@@ -96,6 +96,15 @@
 }
 
 @font-face {
+  font-family: "Reem Kufi";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 700;
+  src: url("/fonts/reem-kufi-arabic-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0897-08E1, U+FB50-FDFF, U+FE70-FEFC;
+}
+
+@font-face {
   font-family: "Lalezar";
   font-style: normal;
   font-display: swap;
@@ -136,48 +145,47 @@
 }
 
 /* ==========================================================================
-   غلاف Design Tokens — "Cairo Pocket Print-House" (مطبعة جيب قاهرية)
+   غلاف Unified Design System — Driven Directly by the Official Logo
+   Logo Colors: Black (#010000), White (#FFFFFF), Gold (#FECE05), Crimson (#EC0A12)
    ========================================================================== */
 
 :root {
-  /* Neutrals: Sunlit Cotton Print Stock & Carbon Press Ink */
-  --paper: #F7F5F0;          /* Primary page ground (17.1:1 vs --ink) */
-  --surface: #FFFFFF;        /* Elevated sheets, cards, inputs, modals */
-  --surface-warm: #EDE9DF;   /* Milled paper secondary wells & inactive chips */
-  --ink: #14181F;            /* Primary headlines, body, keylines */
-  --ink-soft: #252B36;       /* Dark studio panels */
-  --ink-muted: #4A515E;      /* Secondary copy & captions (7.5:1 on --paper, AAA) */
+  /* Core Surfaces */
+  --brand-black: #010000;      /* Matches official logo ground seamlessly (Header, Footer, Loading badge) */
+  --paper: #F7F6F2;            /* Main storefront page background */
+  --card-bg: #ECEAE4;          /* SINGLE fixed product stage background across ALL product cards & stages */
+  --surface: #FFFFFF;          /* Elevated panels, inputs, sheets, dropdowns */
+  --surface-muted: #E6E3DC;    /* Subtle secondary pills & dividers */
 
-  /* Dominant Brand Color: Cairo Vermilion (5.13:1 with #FFFFFF, 4.72:1 on --paper) */
-  --brand: #CE3218;
-  --brand-hover: #B22811;
-  --brand-tint: #FCECE8;
+  /* Ink & Text (WCAG AAA on --paper & --surface) */
+  --ink: #111317;              /* 18.1:1 on --paper */
+  --ink-muted: #4E535C;        /* 7.3:1 on --paper */
 
-  /* Supporting 1: Nile Cobalt — Device Fit, Model Selector & Focus Ring (7.8:1 with #FFFFFF) */
-  --cobalt: #1746B8;
-  --cobalt-tint: #E9EFFD;
+  /* Official Logo-Harmonized Brand Colors */
+  --brand: #D40C14;            /* Primary CTA Crimson (5.48:1 WCAG AA with #FFFFFF text) */
+  --brand-hover: #B30910;
+  --brand-tint: #FCEBEC;
 
-  /* Supporting 2: Palm Jade — Added-to-Cart & COD Trust Signal (6.1:1 with #FFFFFF) */
-  --jade: #0F6E56;
-  --jade-tint: #E2F4EE;
+  --brand-yellow: #FECE05;     /* Official Logo Gold — strictly paired with --brand-black / --ink text (13.8:1 AAA) */
+  --brand-yellow-hover: #F2C200;
+  --brand-yellow-tint: #FEF7D6;
 
-  /* Accent: Sunburst Taxi Yellow — Surface Stamp / Highlight ONLY, ALWAYS paired with --ink text (12.8:1) */
-  --sun: #F7C948;
-  --sun-soft: #FDF3CF;
+  /* Positive / COD Status */
+  --jade: #0E6F4F;             /* 6.1:1 WCAG AA with #FFFFFF text */
+  --jade-tint: #E3F4EE;
 
-  /* Borders & Press Shadows */
-  --border-subtle: rgba(20, 24, 31, 0.12);
-  --border-strong: #14181F;
-  --press-shadow-sm: -2px 2px 0 #14181F;
-  --press-shadow-md: -3px 3px 0 #14181F;
+  /* Borders & Elevation */
+  --border-subtle: rgba(17, 19, 23, 0.10);
+  --border-strong: rgba(17, 19, 23, 0.22);
+  --shadow-panel: 0 14px 34px rgba(17, 19, 23, 0.14);
 
-  /* Radii */
+  /* Consistent Shape Language */
   --radius-ui: 8px;
-  --radius-stage: 14px;
+  --radius-stage: 12px;
   --radius-pill: 999px;
 
-  /* Font Stacks */
-  --font-display: "Bricolage Grotesque", "Reem Kufi", "Reem Kufi Fallback", system-ui, sans-serif;
+  /* Clean, Modern, Ultra-Legible Typography */
+  --font-display: "Bricolage Grotesque", "Cairo", "Cairo Fallback", system-ui, sans-serif;
   --font-sans: "Bricolage Grotesque", "IBM Plex Sans Arabic", "IBM Plex Sans Arabic Fallback", system-ui, sans-serif;
   --font-latin: "Bricolage Grotesque", system-ui, sans-serif;
 
@@ -191,8 +199,8 @@
   /* Layout & Rhythm */
   --max-page-width: 1720px;
   --page-margin: clamp(16px, 3vw, 44px);
-  --header-height: 68px;
-  --header-offset: 106px;
+  --header-height: 70px;
+  --header-offset: 108px;
   --section-gap: 44px;
   --section-pad-y: calc(var(--section-gap) / 2);
   --page-top-pad: 20px;
@@ -201,33 +209,33 @@
   --grid-row-gap: 26px;
   --image-to-caption: 12px;
 
-  /* Silhouette-accurate case shadows (scaled via @container) */
+  /* Consistent Silhouette Case Shadows & Hover Lift */
   --duration-case-lift: 260ms;
-  --case-shadow-sm: drop-shadow(0 2px 2px rgba(20, 24, 31, 0.20))
-    drop-shadow(0 5px 9px rgba(20, 24, 31, 0.14));
-  --case-shadow-sm-hover: drop-shadow(0 3px 4px rgba(20, 24, 31, 0.24))
-    drop-shadow(0 9px 14px rgba(20, 24, 31, 0.18));
-  --case-shadow-md: drop-shadow(0 2px 3px rgba(20, 24, 31, 0.22))
-    drop-shadow(0 14px 22px rgba(20, 24, 31, 0.17));
-  --case-shadow-md-hover: drop-shadow(0 4px 6px rgba(20, 24, 31, 0.25))
-    drop-shadow(0 22px 32px rgba(20, 24, 31, 0.23));
-  --case-shadow-lg: drop-shadow(0 3px 5px rgba(20, 24, 31, 0.24))
-    drop-shadow(0 20px 30px rgba(20, 24, 31, 0.20));
-  --case-shadow-lg-hover: drop-shadow(0 6px 9px rgba(20, 24, 31, 0.26))
-    drop-shadow(0 28px 40px rgba(20, 24, 31, 0.25));
+  --case-shadow-sm: drop-shadow(0 2px 2px rgba(17, 19, 23, 0.20))
+    drop-shadow(0 5px 9px rgba(17, 19, 23, 0.13));
+  --case-shadow-sm-hover: drop-shadow(0 3px 4px rgba(17, 19, 23, 0.24))
+    drop-shadow(0 9px 14px rgba(17, 19, 23, 0.18));
+  --case-shadow-md: drop-shadow(0 2px 3px rgba(17, 19, 23, 0.22))
+    drop-shadow(0 12px 20px rgba(17, 19, 23, 0.15));
+  --case-shadow-md-hover: drop-shadow(0 4px 6px rgba(17, 19, 23, 0.25))
+    drop-shadow(0 20px 30px rgba(17, 19, 23, 0.21));
+  --case-shadow-lg: drop-shadow(0 3px 5px rgba(17, 19, 23, 0.24))
+    drop-shadow(0 18px 28px rgba(17, 19, 23, 0.18));
+  --case-shadow-lg-hover: drop-shadow(0 6px 9px rgba(17, 19, 23, 0.26))
+    drop-shadow(0 26px 38px rgba(17, 19, 23, 0.24));
 
-  /* Legacy aliases so all routes remain cohesive */
+  /* Backwards-compatible aliases across all existing routes */
   --plaster: var(--paper);
   --gallery-white: var(--surface);
   --charcoal: var(--ink);
   --graphite: var(--ink-muted);
   --klein: var(--brand);
-  --input-border: rgba(20, 24, 31, 0.20);
+  --input-border: rgba(17, 19, 23, 0.20);
 }
 
 @media (min-width: 768px) {
   :root {
-    --section-gap: clamp(52px, 5vw, 76px);
+    --section-gap: clamp(52px, 5vw, 74px);
     --page-top-pad: 26px;
     --heading-to-content: 26px;
     --grid-col-gap: 20px;
@@ -239,27 +247,26 @@
   :root {
     --header-offset: 108px;
     --grid-col-gap: 22px;
-    --grid-row-gap: 36px;
+    --grid-row-gap: 34px;
   }
 }
 
 @theme {
-  --color-paper: #F7F5F0;
+  --color-paper: #F7F6F2;
+  --color-card-bg: #ECEAE4;
   --color-surface: #FFFFFF;
-  --color-surface-warm: #EDE9DF;
-  --color-ink: #14181F;
-  --color-ink-muted: #4A515E;
-  --color-brand: #CE3218;
-  --color-cobalt: #1746B8;
-  --color-jade: #0F6E56;
-  --color-sun: #F7C948;
-  --color-plaster: #F7F5F0;
+  --color-ink: #111317;
+  --color-ink-muted: #4E535C;
+  --color-brand: #D40C14;
+  --color-brand-yellow: #FECE05;
+  --color-jade: #0E6F4F;
+  --color-plaster: #F7F6F2;
   --color-gallery-white: #FFFFFF;
-  --color-charcoal: #14181F;
-  --color-graphite: #4A515E;
-  --color-klein: #CE3218;
+  --color-charcoal: #111317;
+  --color-graphite: #4E535C;
+  --color-klein: #D40C14;
   --radius-ui: 8px;
-  --radius-stage: 14px;
+  --radius-stage: 12px;
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
 }
@@ -287,15 +294,21 @@
     overflow-x: clip;
   }
 
-  /* Strictly prevent letter-spacing on Arabic text so cursive letter joining never breaks */
+  /* Never apply letter-spacing on Arabic so letters connect naturally */
   [lang="ar"],
   [dir="rtl"] {
     letter-spacing: 0;
   }
 
-  /* Accessible high-contrast focus ring in Nile Cobalt */
+  /* High-contrast accessible focus ring */
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-    outline: 2px solid var(--cobalt);
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  .brand-dark-bar > div > :where(a, nav a, div > button):focus-visible,
+  footer :where(a, button):focus-visible {
+    outline: 2px solid var(--brand-yellow);
     outline-offset: 2px;
   }
 }
@@ -321,35 +334,42 @@
     padding-bottom: var(--section-pad-y);
   }
 
-  /* Typography System */
+  /* Unified Fixed Product Stage Surface */
+  .product-stage {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-stage);
+  }
+
+  /* Clean, Modern, Highly Readable Cairo Headline Scale */
   .type-display {
     font-family: var(--font-display);
-    font-size: clamp(35px, 4.7vw, 68px);
-    line-height: 1.26;
-    font-weight: 700;
+    font-size: clamp(30px, 3.85vw, 54px);
+    line-height: 1.28;
+    font-weight: 800;
     letter-spacing: 0;
   }
 
   .type-h1 {
     font-family: var(--font-display);
-    font-size: clamp(28px, 3.6vw, 44px);
+    font-size: clamp(28px, 3.4vw, 42px);
     line-height: 1.32;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 0;
   }
 
   .type-h2 {
     font-family: var(--font-display);
-    font-size: clamp(23px, 2.5vw, 33px);
-    line-height: 1.36;
-    font-weight: 700;
+    font-size: clamp(22px, 2.4vw, 31px);
+    line-height: 1.35;
+    font-weight: 800;
     letter-spacing: 0;
   }
 
   .type-h3 {
-    font-family: var(--font-sans);
-    font-size: clamp(18px, 1.8vw, 21px);
-    line-height: 1.4;
+    font-family: var(--font-display);
+    font-size: clamp(18px, 1.7vw, 21px);
+    line-height: 1.42;
     font-weight: 700;
     letter-spacing: 0;
   }
@@ -371,93 +391,79 @@
     letter-spacing: 0;
   }
 
-  /* Latin product titles & codes ONLY */
   .latin-title {
     font-family: var(--font-latin);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.015em;
   }
 
-  /* Tactile Cairo Print-Press Primary CTA */
+  /* Unified Primary Brand Button (Logo Crimson + White) */
   .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-height: 48px;
+    min-height: 46px;
     padding-inline: 22px;
     background-color: var(--brand);
     color: #FFFFFF;
-    border: 1.5px solid var(--ink);
+    border: 1px solid transparent;
     border-radius: var(--radius-ui);
-    box-shadow: var(--press-shadow-sm);
     font-family: var(--font-sans);
-    font-size: 15.5px;
+    font-size: 15px;
     font-weight: 700;
     line-height: 1.35;
     cursor: pointer;
     transition:
-      transform var(--duration-fast) var(--ease-out-expo),
-      box-shadow var(--duration-fast) var(--ease-out-expo),
-      background-color var(--duration-fast) var(--ease-out-expo);
+      background-color var(--duration-fast) var(--ease-out-expo),
+      transform var(--duration-fast) var(--ease-out-expo);
   }
 
   @media (hover: hover) {
     .btn-primary:hover:not(:disabled) {
       background-color: var(--brand-hover);
-      transform: translate(1px, -1px);
-      box-shadow: var(--press-shadow-md);
+      transform: translateY(-1px);
     }
   }
 
   .btn-primary:active:not(:disabled) {
-    transform: translate(-1.5px, 1.5px);
-    box-shadow: 0 0 0 var(--ink);
+    transform: translateY(0);
   }
 
   .btn-primary:disabled {
     opacity: 0.55;
     cursor: not-allowed;
-    box-shadow: none;
   }
 
-  /* Tactile Outlined Studio Button */
+  /* Unified Outlined Secondary Button */
   .btn-outline {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-height: 48px;
+    min-height: 46px;
     padding-inline: 20px;
     background-color: var(--surface);
     color: var(--ink);
-    border: 1.5px solid var(--ink);
+    border: 1px solid var(--border-strong);
     border-radius: var(--radius-ui);
-    box-shadow: var(--press-shadow-sm);
     font-family: var(--font-sans);
-    font-size: 15.5px;
+    font-size: 15px;
     font-weight: 600;
     line-height: 1.35;
     cursor: pointer;
     transition:
-      transform var(--duration-fast) var(--ease-out-expo),
-      box-shadow var(--duration-fast) var(--ease-out-expo),
+      border-color var(--duration-fast) var(--ease-out-expo),
       background-color var(--duration-fast) var(--ease-out-expo);
   }
 
   @media (hover: hover) {
     .btn-outline:hover:not(:disabled) {
-      background-color: var(--sun-soft);
-      transform: translate(1px, -1px);
-      box-shadow: var(--press-shadow-md);
+      border-color: var(--ink);
+      background-color: var(--card-bg);
     }
   }
 
-  .btn-outline:active:not(:disabled) {
-    transform: translate(-1.5px, 1.5px);
-    box-shadow: 0 0 0 var(--ink);
-  }
-
-  /* Clean Inline Text Link Action */
+  /* Clean Inline Text Action */
   .btn-secondary {
     display: inline-flex;
     align-items: center;
@@ -483,28 +489,26 @@
     color: var(--brand);
   }
 
-  /* Selected state in Nile Cobalt */
   .is-selected {
-    outline: 2px solid var(--cobalt);
+    outline: 2px solid var(--ink);
     outline-offset: 1px;
   }
 
-  /* Sunburst Print-House Stamp Badge (dark ink on bright marigold) */
-  .stamp-sun {
+  /* Brand Gold Badge (Logo Yellow #FECE05 + #111317 dark ink = 13.8:1 AAA) */
+  .badge-brand-yellow {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     border-radius: 6px;
-    border: 1px solid var(--ink);
-    background-color: var(--sun);
-    padding: 3px 10px;
+    background-color: var(--brand-yellow);
+    padding: 4px 11px;
     font-size: 12.5px;
     font-weight: 700;
     line-height: 1.4;
     color: var(--ink);
   }
 
-  /* Silhouette-accurate case shadows + smooth GPU hover lift */
+  /* Silhouette Case Shadows & Smooth GPU Hover Lift */
   .case-wall-shadow {
     --case-shadow-rest: var(--case-shadow-md);
     --case-shadow-active: var(--case-shadow-md-hover);
@@ -512,8 +516,8 @@
   }
 
   .case-lift-motion {
-    --case-lift-y: -6px;
-    --case-lift-scale: 1.024;
+    --case-lift-y: -5px;
+    --case-lift-scale: 1.02;
     transform: translateY(0) scale(1);
     transform-origin: center center;
     transition: transform var(--duration-case-lift) var(--ease-out-expo);
@@ -543,8 +547,8 @@
     }
 
     .case-lift-motion {
-      --case-lift-y: -7px;
-      --case-lift-scale: 1.018;
+      --case-lift-y: -6px;
+      --case-lift-scale: 1.016;
     }
   }
 
@@ -611,13 +615,12 @@
   }
 }
 
-/* Custom studio range sliders */
 .gallery-range {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
   height: 5px;
-  background: rgba(20, 24, 31, 0.16);
+  background: rgba(17, 19, 23, 0.16);
   border-radius: 999px;
   cursor: pointer;
 }
@@ -629,12 +632,8 @@
   height: 20px;
   border-radius: 6px;
   background: var(--brand);
-  border: 2px solid var(--ink);
+  border: 2px solid var(--surface);
   cursor: pointer;
-}
-
-.gallery-range:focus-visible::-webkit-slider-thumb {
-  background: var(--cobalt);
 }
 
 .gallery-range::-moz-range-thumb {
@@ -642,7 +641,7 @@
   height: 20px;
   border-radius: 6px;
   background: var(--brand);
-  border: 2px solid var(--ink);
+  border: 2px solid var(--surface);
   cursor: pointer;
 }
 

@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { MotionConfig } from 'motion/react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrandLogo } from './components/brand/BrandLogo';
 import { StoreProvider } from './context/StoreContext';
 import { MainLayout } from './layout/MainLayout';
 import { HomePage } from './pages/HomePage';
@@ -24,6 +25,15 @@ const NotFoundPage = lazy(() =>
   import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))
 );
 
+function RouteLoadingFallback() {
+  return (
+    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 py-12" role="status" aria-live="polite">
+      <BrandLogo size="sm" onLightSurface />
+      <span className="type-caption">جاري التحميل...</span>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <MotionConfig reducedMotion="user">
@@ -35,7 +45,7 @@ export default function App() {
               <Route
                 path="/categories"
                 element={
-                  <Suspense fallback={<div className="min-h-[60vh]" />}>
+                  <Suspense fallback={<RouteLoadingFallback />}>
                     <CategoriesPage />
                   </Suspense>
                 }
@@ -43,7 +53,7 @@ export default function App() {
               <Route
                 path="/categories/:slug"
                 element={
-                  <Suspense fallback={<div className="min-h-[60vh]" />}>
+                  <Suspense fallback={<RouteLoadingFallback />}>
                     <CategoriesPage />
                   </Suspense>
                 }
@@ -51,7 +61,7 @@ export default function App() {
               <Route
                 path="/products/:slug"
                 element={
-                  <Suspense fallback={<div className="min-h-[60vh]" />}>
+                  <Suspense fallback={<RouteLoadingFallback />}>
                     <ProductDetailPage />
                   </Suspense>
                 }
@@ -59,7 +69,7 @@ export default function App() {
               <Route
                 path="/customize"
                 element={
-                  <Suspense fallback={<div className="min-h-[60vh]" />}>
+                  <Suspense fallback={<RouteLoadingFallback />}>
                     <CustomizePage />
                   </Suspense>
                 }
@@ -67,7 +77,7 @@ export default function App() {
               <Route
                 path="/how-it-works"
                 element={
-                  <Suspense fallback={<div className="min-h-[60vh]" />}>
+                  <Suspense fallback={<RouteLoadingFallback />}>
                     <HowItWorksPage />
                   </Suspense>
                 }
@@ -75,7 +85,7 @@ export default function App() {
               <Route
                 path="/checkout"
                 element={
-                  <Suspense fallback={<div className="min-h-[60vh]" />}>
+                  <Suspense fallback={<RouteLoadingFallback />}>
                     <CheckoutPage />
                   </Suspense>
                 }
@@ -83,7 +93,7 @@ export default function App() {
               <Route
                 path="*"
                 element={
-                  <Suspense fallback={<div className="min-h-[40vh]" />}>
+                  <Suspense fallback={<RouteLoadingFallback />}>
                     <NotFoundPage />
                   </Suspense>
                 }

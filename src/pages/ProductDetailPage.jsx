@@ -3,15 +3,14 @@ import { Link, useParams } from 'react-router-dom';
 import { PageHeading } from '../components/common/PageHeading';
 import { BackArrowRtlIcon, CashCodIcon, CheckIcon, PhoneHardwareIcon } from '../components/icons/Icons';
 import { PhoneCaseMockup } from '../components/mockup/PhoneCaseMockup';
-import { getProductStageTheme } from '../components/mockup/productPresentation';
 import { ProductCard } from '../components/product/ProductCard';
 import { STORE_CONFIG } from '../config/store';
 import { useStore } from '../context/StoreContext';
 import { storeService } from '../services/storeService';
 
 /**
- * Product Detail Page (`/products/:slug`) — functional route so every product link
- * (`<a href="/products/:slug">`) resolves cleanly in Stage 1 and expands fully in Stage 2.
+ * Product Detail Page (`/products/:slug`) — uses the same unified `.product-stage`
+ * (`--card-bg`) fixed background, typography, and controls as the rest of the storefront.
  */
 export function ProductDetailPage() {
   const { slug } = useParams();
@@ -49,11 +48,11 @@ export function ProductDetailPage() {
         <div className="page-container">
           <PageHeading
             title="التصميم ده مش موجود"
-            description="ممكن الرابط يكون اتكتب غلط. شوف باقي طبعات غلاف المتاحة دلوقتي."
+            description="ممكن الرابط يكون اتكتب غلط. شوف باقي تصميمات غلاف المتاحة دلوقتي."
           />
           <div className="mt-6 flex flex-wrap gap-4">
             <Link to="/categories" className="btn-primary">
-              كل التصميمات
+              كل الجرابات
             </Link>
             <Link to="/" className="btn-outline">
               الرئيسية
@@ -64,7 +63,6 @@ export function ProductDetailPage() {
     );
   }
 
-  const stage = getProductStageTheme(product.artworkId);
   const material = storeService.getMaterialById(product.materialId);
   const isCompatible =
     !selectedModel || product.compatibleModelIds.includes(selectedModel.id);
@@ -95,11 +93,7 @@ export function ProductDetailPage() {
         </nav>
 
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-x-[var(--grid-col-gap)]">
-          {/* Case stage */}
-          <div
-            style={{ backgroundColor: stage.bg }}
-            className="flex flex-col items-center justify-center rounded-[18px] border-[1.5px] border-[var(--ink)] p-8 sm:p-10 lg:col-span-6"
-          >
+          <div className="product-stage flex flex-col items-center justify-center p-8 sm:p-10 lg:col-span-6">
             <div className="w-[190px] sm:w-[230px] lg:w-[250px]">
               <PhoneCaseMockup
                 model={visualPreviewModel}
@@ -111,10 +105,9 @@ export function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Details & conversion */}
-          <div className="text-start lg:col-span-6 space-y-5">
+          <div className="space-y-5 text-start lg:col-span-6">
             {category ? (
-              <span className="inline-flex rounded-[6px] bg-[var(--surface-warm)] px-2.5 py-1 text-[12.5px] font-bold text-[var(--ink)]">
+              <span className="inline-flex rounded-[6px] bg-[var(--card-bg)] px-2.5 py-1 text-[12.5px] font-bold text-[var(--ink)]">
                 {category.nameAr}
               </span>
             ) : null}
@@ -127,14 +120,13 @@ export function ProductDetailPage() {
               {product.price} {STORE_CONFIG.currencyLabel}
             </p>
 
-            {/* Phone model selector card */}
-            <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--surface)] p-4">
+            <div className="rounded-[var(--radius-stage)] border border-[var(--border-subtle)] bg-[var(--surface)] p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <PhoneHardwareIcon className="h-4 w-4 text-[var(--cobalt)]" />
+                  <PhoneHardwareIcon className="h-4 w-4 text-[var(--ink)]" />
                   <span className="text-[14.5px] font-bold text-[var(--ink)]">
                     الموبايل:{' '}
-                    <bdi dir="ltr" className="latin-title text-[var(--cobalt)]">
+                    <bdi dir="ltr" className="latin-title">
                       {selectedModel ? selectedModel.name : `${visualPreviewModel.name} (معاينة)`}
                     </bdi>
                   </span>
@@ -171,7 +163,7 @@ export function ProductDetailPage() {
                 )}
               </button>
               <Link to="/customize" className="btn-outline">
-                صمّم بصورتك أو اسمك
+                صمّم جرابك
               </Link>
             </div>
 
@@ -187,8 +179,8 @@ export function ProductDetailPage() {
         </div>
 
         {relatedProducts.length > 0 ? (
-          <section className="mt-12 pt-8 border-t border-[var(--border-subtle)]">
-            <h2 className="type-h2 mb-5 text-[var(--ink)]">طبعات تانية هتعجبك</h2>
+          <section className="mt-12 border-t border-[var(--border-subtle)] pt-8">
+            <h2 className="type-h2 mb-5 text-[var(--ink)]">تصميمات تانية هتعجبك</h2>
             <div className="grid grid-cols-2 gap-x-[var(--grid-col-gap)] gap-y-[var(--grid-row-gap)] lg:grid-cols-4">
               {relatedProducts.map((item) => (
                 <ProductCard
